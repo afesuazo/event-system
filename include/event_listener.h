@@ -9,6 +9,8 @@ namespace event_manager {
 
     class EventListener {
     public:
+        EventListener() = default;
+        ~EventListener() = default;
         void OnEvent(const std::string& eventName);
     };
 

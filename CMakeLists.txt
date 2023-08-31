@@ -8,6 +8,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 set(EVENT_MANAGER_SOURCES
         src/main.cpp
         src/event_manager.cpp
+        src/event_listener.cpp
 )
 
 add_executable(event_manager ${EVENT_MANAGER_SOURCES})
