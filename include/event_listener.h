@@ -9,19 +9,17 @@
 namespace event_manager {
 
     /**
-     * @class EventListenerBase
-     *
+     * @class IEventListenerBase
      * @brief Interface for all event listeners, intended for polymorphism.
      *
      * Provides a base interface for all event listeners. This allows us to easily create containers for
      * EventListeners and handle multiple types of events in a uniform manner.
      *
-     * @note Should not be inherited from directly, instead use EventListener
-     *
+     * @note Should not be inherited from directly, instead use IEventListener
      */
-    class EventListenerBase {
+    class IEventListenerBase {
     public:
-        virtual ~EventListenerBase() = default;
+        virtual ~IEventListenerBase() = default;
 
         /**
          * @brief Called when an event this listener subscribed to is triggered
@@ -32,14 +30,14 @@ namespace event_manager {
     };
 
     /**
-     * @class EventListener
+     * @class IEventListener
      * @brief Templated interface for creating a listener of a specific event type
      *
      * @tparam TEvent The event type this listener is intended to subscribe to
      * @note The `TEvent` type must be derived from `IEvent`
      */
     template<typename TEvent>
-    class EventListener : public EventListenerBase {
+    class IEventListener : public IEventListenerBase {
         static_assert(std::is_base_of<IEvent, TEvent>::value, "TEvent must be be derived from IEvent");
     public:
 

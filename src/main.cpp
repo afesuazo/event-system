@@ -9,15 +9,15 @@
 
 class GeneralEvent : public event_manager::IEvent {
 public:
-    int GetType() const override {
+    int GetSubType() const override {
         return 5;
     }
 };
 
-class GeneralEventListener : public event_manager::EventListener<GeneralEvent> {
+class GeneralEventListener : public event_manager::IEventListener<GeneralEvent> {
 public:
     void OnEvent(GeneralEvent& event) override {
-        std::cout << "Received string event: " << event.GetType() << std::endl;
+        std::cout << "Received string event: " << event.GetSubType() << std::endl;
     }
 };
 
