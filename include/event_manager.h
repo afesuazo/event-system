@@ -2,11 +2,11 @@
 // Created by Andres Suazo
 //
 
-#pragma once
+#define ENABLE_SAFETY_CHECKS
 
+#pragma once
 #include "event_listener.h"
 #include <unordered_map>
-#include "string"
 #include "algorithm"
 #include <typeindex>
 #include <memory>
@@ -26,7 +26,6 @@ namespace event_manager {
         using EventSubscriberMap = std::unordered_map<std::type_index, std::vector<std::weak_ptr<IEventListenerBase>>>;
 
         EventManager() = default;
-
         ~EventManager() = default;
 
         /**
@@ -39,14 +38,16 @@ namespace event_manager {
          * previously registered, it will be registered with the given listener as its only subscriber.
          */
         template<typename TEvent>
-        void AddSubscriber(std::shared_ptr<IEventListener<TEvent>> listener) {
+        void AddSubscriber(const std::shared_ptr<IEventListener<TEvent>>& listener) {
 
-            // Adding a new key creates a default initialized vector
+#ifdef ENABLE_SAFETY_CHECKS
             if (!SubscriptionExists(listener)) {
-                std::type_index type = typeid(TEvent);
-                subscribers[type].push_back(std::weak_ptr<IEventListener<TEvent>>(listener));
+#endif
+                // Adding a new key creates a default initialized vector
+                subscribers[typeid(TEvent)].push_back(listener);
+#ifdef ENABLE_SAFETY_CHECKS
             }
-
+#endif
         }
 
         /**
@@ -59,26 +60,27 @@ namespace event_manager {
          * after removing the listener, the event will be removed from the map
          */
         template<typename TEvent>
-        void RemoveSubscriber(std::shared_ptr<IEventListener<TEvent>> listener) {
+        void RemoveSubscriber(const std::shared_ptr<IEventListener<TEvent>>& listener) {
 
             // Check if key exists to avoid creating an empty vector
-            std::type_index type = typeid(TEvent);
-            auto it = GetEventMapIterator(type);
-
+            auto it = GetEventMapIterator(typeid(TEvent));
             // No key found, nothing to remove
             if (it == subscribers.end()) { return; }
 
             auto &listeners = it->second;
-            listeners.erase(std::remove_if(listeners.begin(), listeners.end(), [&listener](
+            it->second.erase(std::remove_if(listeners.begin(), listeners.end(), [&listener](
                     const std::weak_ptr<IEventListenerBase> &listenerWeakPtr) {
-                return listenerWeakPtr.lock() == listener;
+                auto sharedPtr = listenerWeakPtr.lock();
+                // Also check if pointer is still valid
+                return !sharedPtr || sharedPtr == listener;
             }), listeners.end());
 
+#ifdef ENABLE_SAFETY_CHECKS
             // Make sure we don't leave unused keys and empty vectors
             if (listeners.empty()) {
                 subscribers.erase(it);
             }
-
+#endif
         }
 
         /**
@@ -90,12 +92,10 @@ namespace event_manager {
          * Informs all subscribers for the given event type that the event has been triggered.
          */
         template<typename TEvent>
-        void TriggerEvent(TEvent &event) {
+        void EmitEvent(TEvent &event) {
 
             // Without this check, an empty vector would be created, and we would loop over an empty container
-            std::type_index type = typeid(TEvent);
-            auto it = GetEventMapIterator(type);
-
+            auto it = GetEventMapIterator(typeid(TEvent));
             if (it == subscribers.end()) { return; }
 
             // Iterate through the collection of weak_pointers
@@ -124,12 +124,10 @@ namespace event_manager {
          * @return True if there is a listener subscribed to the event type
          */
         template<typename TEvent>
-        bool SubscriptionExists(std::shared_ptr<IEventListener<TEvent>> listener) const {
-
-            std::type_index type = typeid(TEvent);
+        bool SubscriptionExists(const std::shared_ptr<IEventListener<TEvent>>& listener) const {
 
             // GetEventMapIterator() not used to keep this as const method
-            auto it = subscribers.find(type);
+            auto it = subscribers.find(typeid(TEvent));
             if (it == subscribers.end()) { return false; }
 
             auto &listeners = it->second;
@@ -138,8 +136,8 @@ namespace event_manager {
             return std::any_of(
                     listeners.begin(),
                     listeners.end(),
-                    [&listener](const std::weak_ptr<IEventListenerBase> &weak_listener) {
-                        return weak_listener.lock() == listener;
+                    [&listener](const std::weak_ptr<IEventListenerBase> &listenerWeakPtr) {
+                        return listenerWeakPtr.lock() == listener;
                     });
         }
 

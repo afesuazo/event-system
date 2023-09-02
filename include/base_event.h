@@ -3,20 +3,24 @@
 //
 
 #pragma once
+#include <typeindex>
+#include <string>
 
 namespace event_manager {
 
     /**
-     * @class IEvent
-     * @brief Interface for all events
+     * @class BaseEvent
+     * @brief Base class for all events
      *
-     * Provides a simple interface for all events to implement. Essentially and event requires a
-     * method to relay any general details about the event type/category
+     * Provides a simple base class for all events to extend. Essentially and event requires a
+     * method to relay any general details about the event type/category and its name
      */
-    class IEvent {
+    class BaseEvent {
     public:
-        virtual ~IEvent() = default;
 
+        virtual ~BaseEvent() = default;
+
+        [[nodiscard]] virtual std::type_index GetType() const = 0; // Class Type
         /**
          * @brief Get the sub-type of the event
          *
@@ -27,6 +31,7 @@ namespace event_manager {
          * @note Currently returns an int but this will be switched to an enum less error prone code.
          */
         [[nodiscard]] virtual int GetSubType() const = 0; // TODO: Switch to an enum
+        [[nodiscard]] virtual std::string GetName() const = 0;
     };
 
 }
