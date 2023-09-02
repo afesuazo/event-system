@@ -40,17 +40,20 @@ int main() {
     event_manager::EventManager eventManager;
 
     // Create shared pointers to event listeners
-    auto eventListener1 = std::make_shared<GeneralEventListener>();
+    std::shared_ptr<event_manager::IEventListener<GeneralEvent>> eventListener1 = std::make_shared<GeneralEventListener>();
     auto eventListener2 = std::make_shared<GeneralEventListener>();
 
     /*
      * The compiler doesn't turn std::shared_ptr<Derived> to std::shared_ptr<Base> so we
      * need a static cast. This is done at compile time so not real performance hit
      */
-    //eventManager.AddSubscriber(std::static_pointer_cast<event_manager::IEventListener<GeneralEvent>>(eventListener1));
-    //eventManager.AddSubscriber(std::static_pointer_cast<event_manager::IEventListener<GeneralEvent>>(eventListener2));
+    eventManager.AddSubscriber(eventListener1);
 
     GeneralEvent sampleEvent;
+    eventManager.EmitEvent(sampleEvent);
+
+    eventManager.RemoveSubscriber(eventListener1);
+
     eventManager.EmitEvent(sampleEvent);
 
     return 0;

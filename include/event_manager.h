@@ -60,7 +60,7 @@ namespace event_manager {
          * after removing the listener, the event will be removed from the map
          */
         template<typename TEvent>
-        void RemoveSubscriber(const std::shared_ptr<IEventListenerBase>& listener) {
+        void RemoveSubscriber(const std::shared_ptr<IEventListener<TEvent>>& listener) {
 
             // Check if key exists to avoid creating an empty vector
             auto it = GetEventMapIterator(typeid(TEvent));
@@ -69,7 +69,7 @@ namespace event_manager {
 
             auto &listeners = it->second;
             it->second.erase(std::remove_if(listeners.begin(), listeners.end(), [&listener](
-                    const std::weak_ptr<IEventListener<TEvent>> &listenerWeakPtr) {
+                    const std::weak_ptr<IEventListenerBase> &listenerWeakPtr) {
                 auto sharedPtr = listenerWeakPtr.lock();
                 // Also check if pointer is still valid
                 return !sharedPtr || sharedPtr == listener;
@@ -136,7 +136,7 @@ namespace event_manager {
             return std::any_of(
                     listeners.begin(),
                     listeners.end(),
-                    [&listener](const std::weak_ptr<IEventListener<TEvent>> &listenerWeakPtr) {
+                    [&listener](const std::weak_ptr<IEventListenerBase> &listenerWeakPtr) {
                         return listenerWeakPtr.lock() == listener;
                     });
         }
