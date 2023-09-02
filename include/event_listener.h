@@ -3,8 +3,7 @@
 //
 
 #pragma once
-#include "string"
-#include "i_event.h"
+#include "base_event.h"
 
 namespace event_manager {
 
@@ -26,7 +25,7 @@ namespace event_manager {
          *
          * @param event Reference to the event that was triggered.
          */
-        virtual void OnEvent(IEvent& event) = 0;
+        virtual void OnEvent(BaseEvent& event) = 0;
     };
 
     /**
@@ -38,18 +37,18 @@ namespace event_manager {
      */
     template<typename TEvent>
     class IEventListener : public IEventListenerBase {
-        static_assert(std::is_base_of<IEvent, TEvent>::value, "TEvent must be be derived from IEvent");
+        static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be be derived from IEvent");
     public:
 
         /**
          * @brief Overridden method to handle type-erasure. Will immediately call the expected OnEvent method.
          *
          * Dynamically casts the event reference to the expected event type (TEvent). If types match,
-         * an virtual OnEvent function with the same signature gets called.
+         * a virtual OnEvent function with the same signature gets called.
          *
          * @param event The event that was triggered.
          */
-        void OnEvent(IEvent& event) override {
+        void OnEvent(BaseEvent& event) override {
             if (typeid(event) == typeid(TEvent)) {
                 OnEvent(dynamic_cast<TEvent&>(event));
             }
