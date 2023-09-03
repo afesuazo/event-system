@@ -8,6 +8,19 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include "event_layer.h"
+
+class SampleLayer : public event_manager::EventLayer {
+public:
+    explicit SampleLayer(std::shared_ptr<event_manager::EventManager> &eventManager1)
+    : EventLayer(eventManager1) {};
+
+    void OnEvent(event_manager::BaseEvent &event) override {
+        // eventManager.EmitEvent(event);
+        std::cout << "Sample layer on event called: " << event.GetType().name() << "\n";
+    }
+
+};
 
 class GeneralEvent : public event_manager::BaseEvent {
 public:
@@ -60,7 +73,9 @@ int main() {
 
     std::cout << "Event Manager!\n\n";
 
-    event_manager::EventManager eventManager;
+    std::shared_ptr<event_manager::EventManager>
+            eventManager = std::make_shared<event_manager::EventManager>();
+    SampleLayer sampleLayer(eventManager);
 
     // Create shared pointers to event listeners
     std::shared_ptr<event_manager::IEventListener<GeneralEvent>>
@@ -72,19 +87,20 @@ int main() {
      * The compiler doesn't turn std::shared_ptr<Derived> to std::shared_ptr<Base> so we
      * need a static cast. This is done at compile time so not real performance hit
      */
-    eventManager.AddSubscriber(generalListener);
-    eventManager.AddSubscriber(specificListener);
+    sampleLayer.AddListener(specificListener);
+    sampleLayer.AddListener(generalListener);
 
     GeneralEvent sampleGeneralEvent;
     SpecificEvent sampleSpecificEvent;
 
-    eventManager.EmitEvent(sampleGeneralEvent);
-    eventManager.EmitEvent(sampleSpecificEvent);
+    eventManager->EmitEvent(sampleGeneralEvent);
+    sampleLayer.OnEvent(sampleGeneralEvent);
+    sampleLayer.OnEvent(sampleSpecificEvent);
 
-    eventManager.RemoveSubscriber(generalListener);
+    // sampleLayer.RemoveEventListener(generalListener);
 
-    eventManager.EmitEvent(sampleGeneralEvent); // Nothing should be received by the general listener
-    eventManager.EmitEvent(sampleSpecificEvent);
+    // eventManager.EmitEvent(sampleGeneralEvent); // Nothing should be received by the general listener
+    // eventManager.EmitEvent(sampleSpecificEvent);
 
     return 0;
 }
