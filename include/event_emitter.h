@@ -12,7 +12,9 @@ namespace event_manager {
     class EventEmitter {
     public:
 
-        EventEmitter();
+        EventEmitter(const std::shared_ptr<EventManager>& eventManager) :
+        eventManager(eventManager) {}
+
         ~EventEmitter();
 
         template <typename TEvent>
