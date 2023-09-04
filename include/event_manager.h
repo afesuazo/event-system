@@ -141,6 +141,22 @@ namespace event_manager {
                     });
         }
 
+        [[nodiscard]] size_t GetSubscriberCount() const {
+            int count{0};
+            for (const auto& eventType : subscribers) {
+                count += eventType.second.size();
+            }
+            return count;
+        }
+
+        template<typename TEvent>
+        [[nodiscard]] size_t GetSubscriberCount() const {
+            auto it = subscribers.find(typeid(TEvent));
+            if (it == subscribers.end()) { return 0; }
+
+            return it->second.size();
+        }
+
     private:
         /**
          * @brief Checks if an event type is part of the internal map

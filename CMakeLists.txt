@@ -11,5 +11,5 @@ set(EVENT_MANAGER_SOURCES
 
 add_executable(event_manager ${EVENT_MANAGER_SOURCES})
 
-#enable_testing()
-#add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
+enable_testing()
+add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
