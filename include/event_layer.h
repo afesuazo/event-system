@@ -5,6 +5,8 @@
 #pragma once
 
 #include "base_event.h"
+#include "event_manager.h"
+#include "event_emitter.h"
 
 namespace event_manager {
 
@@ -31,11 +33,17 @@ namespace event_manager {
         }
 
         // Triggers an event on the local event manager
-        virtual void OnEvent(BaseEvent& event) = 0;
+        void EmitEvent(BaseEvent& event) {
+            if (auto sharedManager = eventManager.lock()) {
+                // Register listener
+                sharedManager->RemoveSubscriber(listener);
+            }
+        };
 
     protected:
         // Points to the shared event manager
         std::weak_ptr<EventManager> eventManager;
+        std::weak_ptr<EventEmitter> eventEmitter;
         std::string name;
     };
 

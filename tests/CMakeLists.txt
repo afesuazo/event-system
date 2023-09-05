@@ -2,9 +2,7 @@ find_package(GTest REQUIRED)
 
 set(TEST_SOURCES
         test_event_manager.cpp
-        test_base_event.cpp
         test_event_emitter.cpp
-        test_event_layer.cpp
         test_event_listener.cpp
 )
 

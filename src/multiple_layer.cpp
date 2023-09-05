@@ -74,7 +74,7 @@ public:
 
     using EventLayer :: EventLayer;
 
-    void OnEvent(event_manager::BaseEvent &event) override {
+    void EmitEvent(BaseEvent &event) override {
         // eventManager.EmitEvent(event);
         std::cout << "Sample layer 1 on event called: " << event.GetType().name() << "\n";
     }
@@ -85,7 +85,7 @@ public:
 
     using EventLayer :: EventLayer;
 
-    void OnEvent(event_manager::BaseEvent &event) override {
+    void EmitEvent(BaseEvent &event) override {
         // eventManager.EmitEvent(event);
         std::cout << "Sample layer 1 on event called: " << event.GetType().name() << "\n";
     }
@@ -116,14 +116,17 @@ int main() {
     std::shared_ptr<IEventListener<GeneralEvent>>
             generalListener = std::make_shared<GeneralEventListener>();
 
+    std::shared_ptr<IEventListener<GeneralEvent>>
+            generalListener2 = std::make_shared<GeneralEventListener>();
+
     sampleLayer1.AddListener(generalListener);
-    sampleLayer2.AddListener(generalListener);
+    sampleLayer2.AddListener(generalListener2);
 
     // Create an emitter
     GeneralEventEmitter generalEventEmitter{eventManager};
 
-    //
     // Emit events
+    // Used by any function in a layer
     GeneralEvent generalEvent0{GeneralEvent::SubType::GeneralSubType0};
     GeneralEvent generalEvent1{GeneralEvent::SubType::GeneralSubType1};
     SpecificEvent specificEvent0{SpecificEvent::SubType::SpecificSubType0};

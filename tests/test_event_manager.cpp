@@ -7,6 +7,7 @@
 #include "base_event.h"
 #include "event_listener.h"
 #include "testing_utils.h"
+#include <memory>
 
 using namespace event_manager;
 

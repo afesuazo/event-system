@@ -4,6 +4,7 @@
 
 #pragma once
 #include "base_event.h"
+#include "event_listener.h"
 
 namespace event_manager {
 
@@ -58,7 +59,6 @@ namespace event_manager {
         SubType subType_;
     };
 
-
     class GeneralEventListener : public IEventListener<GeneralEvent> {
     public:
         bool eventTriggered = false;
@@ -78,6 +78,5 @@ namespace event_manager {
             std::cout << "Received specific event: " << event.GetSubType() << std::endl;
         }
     };
-
 
 }

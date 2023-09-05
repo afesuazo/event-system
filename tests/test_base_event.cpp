@@ -1,3 +1,0 @@
-//
-// Created by Andres Suazo
-//
