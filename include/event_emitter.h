@@ -12,10 +12,10 @@ namespace event_manager {
     class EventEmitter {
     public:
 
-        EventEmitter(const std::shared_ptr<EventManager>& eventManager) :
+        explicit EventEmitter(const std::shared_ptr<EventManager>& eventManager) :
         eventManager(eventManager) {}
 
-        ~EventEmitter();
+        virtual ~EventEmitter() = default;
 
         template <typename TEvent>
         void Emit(TEvent& event) {
