@@ -10,6 +10,7 @@
 #include "algorithm"
 #include <typeindex>
 #include <memory>
+#include <iostream>
 
 namespace event_manager {
 
@@ -95,7 +96,7 @@ namespace event_manager {
         void EmitEvent(TEvent &event) {
 
             // Without this check, an empty vector would be created, and we would loop over an empty container
-            auto it = GetEventMapIterator(typeid(TEvent));
+            auto it = GetEventMapIterator(typeid(event));
             if (it == subscribers.end()) { return; }
 
             // Iterate through the collection of weak_pointers

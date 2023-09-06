@@ -23,11 +23,11 @@ protected:
 class EventEmitterTest : public ::testing::Test {
 protected:
     std::shared_ptr<EventManager> eventManager;
-    std::shared_ptr<EventEmitter> eventEmitter;
+    EventEmitter eventEmitter;
 
     void SetUp() override {
         eventManager = std::make_shared<EventManager>();
-        eventEmitter = std::make_shared<EventEmitter>(eventManager);
+        eventEmitter = EventEmitter{eventManager};
     }
 };
 
@@ -36,7 +36,7 @@ TEST_F(EventEmitterTest, ValidEventEmissionTest) {
     eventManager->AddSubscriber(generalEventListener);
 
     GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
-    eventEmitter->Emit(generalEvent);
+    eventEmitter.Emit(generalEvent);
 
     auto castedListener = std::static_pointer_cast<GeneralEventListener>(generalEventListener);
     EXPECT_TRUE(castedListener->eventTriggered);
@@ -47,9 +47,9 @@ TEST_F(EventEmitterTest, InvalidEventEmissionTest) {
     eventManager->AddSubscriber(generalEventListener);
 
     GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
-    std::shared_ptr<SpecificOnlyEventEmitter> specificEventEmitter = std::make_shared<SpecificOnlyEventEmitter>(eventManager);;
+    SpecificOnlyEventEmitter specificEventEmitter{eventManager};
 
-    specificEventEmitter->Emit(generalEvent);
+    specificEventEmitter.Emit(generalEvent);
 
     auto castedListener = std::static_pointer_cast<GeneralEventListener>(generalEventListener);
     EXPECT_FALSE(castedListener->eventTriggered);
