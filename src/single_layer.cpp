@@ -106,27 +106,15 @@ public:
 
 };
 
-class GeneralEventEmitter : public EventEmitter {
-public:
-    using EventEmitter::EventEmitter;
-
-    bool IsAllowedEvent(const BaseEvent& event) override {
-        // Only allow KeyEvent types for this specific emitter
-        return dynamic_cast<const GeneralEvent*>(&event) != nullptr;
-    }
-};
-
 int main() {
 
     std::cout << "** Multiple Layer Event System Example **\n\n";
 
     // Set application layers
     SampleLayer1 sampleLayer1{};
-    SampleLayer2 sampleLayer2{};
 
     // Add listeners to each layer
     sampleLayer1.Run();
-    sampleLayer2.Run();
 
     return 0;
 }
