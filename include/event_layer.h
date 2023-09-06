@@ -9,6 +9,8 @@
 #include "event_emitter.h"
 #include <memory>
 #include <string>
+#include <mutex>
+#include <atomic>
 
 namespace event_manager {
 
@@ -23,6 +25,11 @@ namespace event_manager {
 
         virtual void Run() = 0;
 
+        void Stop() {
+            std::lock_guard<std::mutex> lock(mutex);
+            shouldStop = true;
+        }
+
         // For events sourced from external layers
         void OnEvent(BaseEvent& event) {
             eventEmitter.Emit(event);
@@ -30,6 +37,10 @@ namespace event_manager {
 
         std::string GetLayerName() {
             return layerName;
+        }
+
+        size_t GetListenerCount() {
+            return eventManager->GetSubscriberCount();
         }
 
     protected:
@@ -49,6 +60,11 @@ namespace event_manager {
 
         }
 
+        bool ShouldStop() {
+            std::lock_guard<std::mutex> lock(mutex);
+            return shouldStop;
+        }
+
         // Even triggered within the layer
         void TriggerEvent(BaseEvent& event) {
             eventEmitter.Emit(event);
@@ -64,6 +80,9 @@ namespace event_manager {
         // Used to emit local and global events
         EventEmitter eventEmitter;
         std::string layerName;
+
+        std::mutex mutex;
+        std::atomic<bool> shouldStop;
     };
 
 }

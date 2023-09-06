@@ -39,6 +39,7 @@ TEST_F(EventManagerTest, MultipleSubscriberTest) {
     eventManager->AddSubscriber(generalListener2);
 
     ASSERT_EQ(eventManager->GetSubscriberCount(), 2);
+    ASSERT_EQ(eventManager->GetSubscriberCount<BaseEvent>(), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberTest) {
