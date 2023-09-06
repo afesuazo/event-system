@@ -2,7 +2,6 @@
 // Created by Andres Suazo
 //
 
-#include "event_manager.h"
 #include "event_layer.h"
 #include "event_listener.h"
 #include "base_event.h"
@@ -72,23 +71,39 @@ public:
 class SampleLayer1 : public EventLayer {
 public:
 
-    using EventLayer :: EventLayer;
+    SampleLayer1() : EventLayer() {}
 
-    void EmitEvent(BaseEvent &event) override {
-        // eventManager.EmitEvent(event);
-        std::cout << "Sample layer 1 on event called: " << event.GetType().name() << "\n";
+    void Run() override {
+
+        std::shared_ptr<IEventListener<GeneralEvent>>
+                generalListener = std::make_shared<GeneralEventListener>();
+
+        AddListener(generalListener);
+
+        GeneralEvent generalEvent0{GeneralEvent::SubType::GeneralSubType0};
+        TriggerEvent(generalEvent0);
     }
+
 };
 
 class SampleLayer2 : public EventLayer {
 public:
 
-    using EventLayer :: EventLayer;
+    SampleLayer2() : EventLayer() {}
 
-    void EmitEvent(BaseEvent &event) override {
-        // eventManager.EmitEvent(event);
-        std::cout << "Sample layer 1 on event called: " << event.GetType().name() << "\n";
+    void Run() override {
+        std::shared_ptr<IEventListener<GeneralEvent>>
+                generalListener2 = std::make_shared<GeneralEventListener>();
+
+        AddListener(generalListener2);
+
+        GeneralEvent generalEvent1{GeneralEvent::SubType::GeneralSubType1};
+        SpecificEvent specificEvent0{SpecificEvent::SubType::SpecificSubType0};
+
+        TriggerEvent(specificEvent0); // Should not emit an event
+        TriggerEvent(generalEvent1);
     }
+
 };
 
 class GeneralEventEmitter : public EventEmitter {
@@ -105,36 +120,13 @@ int main() {
 
     std::cout << "** Multiple Layer Event System Example **\n\n";
 
-    // Create the event manager
-    std::shared_ptr<EventManager> eventManager = std::make_shared<EventManager>();
-
     // Set application layers
-    SampleLayer1 sampleLayer1{eventManager};
-    SampleLayer2 sampleLayer2{eventManager};
+    SampleLayer1 sampleLayer1{};
+    SampleLayer2 sampleLayer2{};
 
     // Add listeners to each layer
-    std::shared_ptr<IEventListener<GeneralEvent>>
-            generalListener = std::make_shared<GeneralEventListener>();
-
-    std::shared_ptr<IEventListener<GeneralEvent>>
-            generalListener2 = std::make_shared<GeneralEventListener>();
-
-    sampleLayer1.AddListener(generalListener);
-    sampleLayer2.AddListener(generalListener2);
-
-    // Create an emitter
-    GeneralEventEmitter generalEventEmitter{eventManager};
-
-    // Emit events
-    // Used by any function in a layer
-    GeneralEvent generalEvent0{GeneralEvent::SubType::GeneralSubType0};
-    GeneralEvent generalEvent1{GeneralEvent::SubType::GeneralSubType1};
-    SpecificEvent specificEvent0{SpecificEvent::SubType::SpecificSubType0};
-
-    generalEventEmitter.Emit(generalEvent1);
-    generalEventEmitter.Emit(specificEvent0); // Should not emit an event
-    generalEventEmitter.Emit(generalEvent0);
-
+    sampleLayer1.Run();
+    sampleLayer2.Run();
 
     return 0;
 }

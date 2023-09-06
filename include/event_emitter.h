@@ -12,6 +12,8 @@ namespace event_manager {
     class EventEmitter {
     public:
 
+        EventEmitter() = default;
+
         explicit EventEmitter(const std::shared_ptr<EventManager>& eventManager) :
         eventManager(eventManager) {}
 
