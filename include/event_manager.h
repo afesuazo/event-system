@@ -93,7 +93,7 @@ namespace event_manager {
          * Informs all subscribers for the given event type that the event has been triggered.
          */
         template<typename TEvent>
-        void EmitEvent(TEvent &event) {
+        void EmitEvent(const TEvent &event) {
 
             // Without this check, an empty vector would be created, and we would loop over an empty container
             auto it = GetEventMapIterator(typeid(event));
@@ -107,7 +107,7 @@ namespace event_manager {
             for (auto weakPtrIt = listeners.begin(); weakPtrIt != listeners.end();) {
                 // Check if pointer is valid
                 if (auto listener = weakPtrIt->lock()) {
-                    listener->OnEvent(event);
+                    listener->OnEvent(static_cast<const BaseEvent &>(event));
                     ++weakPtrIt;
                 } else {
                     // Object no longer exists and should be removed from map
