@@ -35,7 +35,7 @@ namespace event_manager {
          * @param event The event to emit.
          */
         template <typename TEvent>
-        void Emit(TEvent& event) {
+        void Emit(const TEvent& event) {
             if (!IsAllowedEvent(event)) {
                 std::cerr << "Event type not allowed.\n";
                 return;

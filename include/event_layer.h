@@ -58,7 +58,8 @@ namespace event_manager {
          * @param event The event to emit.
          */
         // For events sourced from external layers
-        void OnEvent(BaseEvent& event) {
+        void OnEvent(const BaseEvent& event) {
+            std::cout << "here";
             eventManager->EmitEvent(event);
         }
 
@@ -123,7 +124,7 @@ namespace event_manager {
          *
          * @param event The event to emit.
          */
-        void TriggerEvent(BaseEvent& event) {
+        void TriggerEvent(const BaseEvent& event) {
             eventEmitter.Emit(event);
         }
 

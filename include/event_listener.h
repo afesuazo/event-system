@@ -3,6 +3,8 @@
 //
 
 #pragma once
+
+#include <iostream>
 #include "base_event.h"
 
 namespace event_manager {
@@ -25,7 +27,7 @@ namespace event_manager {
          *
          * @param event Reference to the event that was triggered.
          */
-        virtual void OnEvent(BaseEvent& event) = 0;
+        virtual void OnEvent(const BaseEvent& event) = 0;
     };
 
     /**
@@ -48,9 +50,9 @@ namespace event_manager {
          *
          * @param event The event that was triggered.
          */
-        void OnEvent(BaseEvent& event) override {
+        void OnEvent(const BaseEvent& event) override {
             if (typeid(event) == typeid(TEvent)) {
-                OnEvent(dynamic_cast<TEvent&>(event));
+                OnEvent(static_cast<const TEvent&>(event));
             }
         }
 
@@ -59,7 +61,7 @@ namespace event_manager {
          *
          * @param event Reference to the event (of type TEvent) that was triggered.
          */
-        virtual void OnEvent(TEvent& event) = 0;
+        virtual void OnEvent(const TEvent& event) = 0;
     };
 
 }

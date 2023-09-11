@@ -18,19 +18,14 @@ public:
         GeneralSubType2
     };
 
-    explicit GeneralEvent(SubType subType) : subType_(subType) {}
-
-    [[nodiscard]] std::type_index GetType() const override {
-        return typeid(this);
+    explicit GeneralEvent(SubType subType) : subType_(subType) {
+        eventName = "GeneralEvent";
     }
 
     [[nodiscard]] int GetSubType() const override {
         return static_cast<int>(subType_);
     }
 
-    [[nodiscard]] std::string GetName() const override {
-        return "GeneralEvent";
-    }
 
 private:
     SubType subType_;
@@ -43,27 +38,23 @@ public:
         SpecificSubType1,
     };
 
-    explicit SpecificEvent(SubType subType) : subType_(subType) {}
-
-    [[nodiscard]] std::type_index GetType() const override {
-        return typeid(this);
+    explicit SpecificEvent(SubType subType) : subType_(subType) {
+        eventName = "SpecificEvent";
     }
 
     [[nodiscard]] int GetSubType() const override {
         return static_cast<int>(subType_);
     }
 
-    [[nodiscard]] std::string GetName() const override {
-        return "SpecificEvent";
-    }
-
 private:
     SubType subType_;
 };
 
+
+
 class GeneralEventListener : public IEventListener<GeneralEvent> {
 public:
-    void OnEvent(GeneralEvent& event) override {
+    void OnEvent(const GeneralEvent& event) override {
         std::cout << "Received general event: " << event.GetSubType() << std::endl;
     }
 };
