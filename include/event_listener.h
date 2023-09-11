@@ -56,6 +56,8 @@ namespace event_manager {
             }
         }
 
+        virtual void RegisterCallback(const std::function<void()>&) = 0;
+
         /**
          * @brief Called when an event this listener subscribed to is triggered
          *
