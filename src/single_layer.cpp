@@ -57,6 +57,9 @@ public:
     void OnEvent(const GeneralEvent& event) override {
         std::cout << "Received general event: " << event.GetSubType() << std::endl;
     }
+
+    void RegisterCallback(const std::function<void()>& callback) override {}
+
 };
 
 class SampleLayer1 : public EventLayer {

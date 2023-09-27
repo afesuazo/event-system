@@ -56,6 +56,11 @@ namespace event_manager {
             eventTriggered = true;
             std::cout << "Received general event: " << event.GetSubType() << std::endl;
         }
+
+        void RegisterCallback(const std::function<void()>& callback) override {
+
+        }
+
     };
 
     class SpecificEventListener : public IEventListener<SpecificEvent> {
@@ -66,6 +71,11 @@ namespace event_manager {
             eventTriggered = true;
             std::cout << "Received specific event: " << event.GetSubType() << std::endl;
         }
+
+        void RegisterCallback(const std::function<void()>& callback) override {
+
+        }
+
     };
 
 }
