@@ -19,10 +19,10 @@ public:
     };
 
     explicit GeneralEvent(SubType subType) : subType_(subType) {
-        eventName = "GeneralEvent";
+        event_name = "GeneralEvent";
     }
 
-    [[nodiscard]] int GetSubType() const override {
+    [[nodiscard]] int get_sub_type() const override {
         return static_cast<int>(subType_);
     }
 
@@ -39,10 +39,10 @@ public:
     };
 
     explicit SpecificEvent(SubType subType) : subType_(subType) {
-        eventName = "SpecificEvent";
+        event_name = "SpecificEvent";
     }
 
-    [[nodiscard]] int GetSubType() const override {
+    [[nodiscard]] int get_sub_type() const override {
         return static_cast<int>(subType_);
     }
 
@@ -55,7 +55,7 @@ private:
 class GeneralEventListener : public IEventListener<GeneralEvent> {
 public:
     void OnEvent(const GeneralEvent& event) override {
-        std::cout << "Received general event: " << event.GetSubType() << std::endl;
+        std::cout << "Received general event: " << event.get_sub_type() << std::endl;
     }
 
     void RegisterCallback(const std::function<void()>& callback) override {}

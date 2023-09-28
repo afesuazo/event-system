@@ -20,12 +20,12 @@ namespace event_manager {
 
         virtual ~BaseEvent() = default;
 
-        [[nodiscard]] std::type_index GetType() const {
+        [[nodiscard]] std::type_index get_type() const {
             return typeid(this); // Class Type
         };
 
-        [[nodiscard]] std::string GetName() const {
-            return eventName;
+        [[nodiscard]] std::string get_name() const {
+            return event_name;
         };
 
         /**
@@ -37,9 +37,9 @@ namespace event_manager {
          * @returns Int representing a specific event sub-type/identifier
          * @note Currently returns an int but this will be switched to an enum less error prone code.
          */
-        [[nodiscard]] virtual int GetSubType() const = 0; // TODO: Switch to an enum
+        [[nodiscard]] virtual int get_sub_type() const = 0; // TODO: Switch to an enum
     protected:
-        std::string eventName = GetType().name();
+        std::string event_name = get_type().name();
     };
 
 

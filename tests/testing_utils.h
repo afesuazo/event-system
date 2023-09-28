@@ -18,10 +18,10 @@ namespace event_manager {
         };
 
         explicit GeneralEvent(SubType subType) : subType_(subType) {
-            eventName = "GeneralEvent";
+            event_name = "GeneralEvent";
         }
 
-        [[nodiscard]] int GetSubType() const override {
+        [[nodiscard]] int get_sub_type() const override {
             return static_cast<int>(subType_);
         }
 
@@ -38,10 +38,10 @@ namespace event_manager {
         };
 
         explicit SpecificEvent(SubType subType) : subType_(subType) {
-            eventName = "SpecificEvent";
+            event_name = "SpecificEvent";
         }
 
-        [[nodiscard]] int GetSubType() const override {
+        [[nodiscard]] int get_sub_type() const override {
             return static_cast<int>(subType_);
         }
 
@@ -56,7 +56,7 @@ namespace event_manager {
 
         void OnEvent(const TEvent& event, bool is_test) {
             eventTriggered = true;
-            std::cout << "Received event: " << event.GetSubType() << std::endl;
+            std::cout << "Received event: " << event.get_sub_type() << std::endl;
         }
     };
 
