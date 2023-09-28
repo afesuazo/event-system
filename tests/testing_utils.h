@@ -17,17 +17,17 @@ namespace event_system {
             GeneralSubType1,
         };
 
-        explicit GeneralEvent(SubType subType) : subType_(subType) {
+        explicit GeneralEvent(SubType sub_type) : sub_type_(sub_type) {
             event_name = "GeneralEvent";
         }
 
         [[nodiscard]] int get_sub_type() const override {
-            return static_cast<int>(subType_);
+            return static_cast<int>(sub_type_);
         }
 
 
     private:
-        SubType subType_;
+        SubType sub_type_;
     };
 
     class SpecificEvent : public BaseEvent {
@@ -37,25 +37,25 @@ namespace event_system {
             SpecificSubType1,
         };
 
-        explicit SpecificEvent(SubType subType) : subType_(subType) {
+        explicit SpecificEvent(SubType sub_type) : sub_type_(sub_type) {
             event_name = "SpecificEvent";
         }
 
         [[nodiscard]] int get_sub_type() const override {
-            return static_cast<int>(subType_);
+            return static_cast<int>(sub_type_);
         }
 
     private:
-        SubType subType_;
+        SubType sub_type_;
     };
 
     template<typename TEvent>
     class TestEventListener : public EventListener<TEvent> {
     public:
-        bool eventTriggered = false;
+        bool event_triggered = false;
 
         void OnEvent(const TEvent& event, bool is_test) {
-            eventTriggered = true;
+            event_triggered = true;
             std::cout << "Received event: " << event.get_sub_type() << std::endl;
         }
     };
@@ -75,15 +75,15 @@ namespace event_system {
             // If we can't lock the pointer,
 
             auto& listeners = it->second;
-            for (auto weakPtrIt = listeners.begin(); weakPtrIt != listeners.end();) {
+            for (auto weak_ptr_it = listeners.begin(); weak_ptr_it != listeners.end();) {
                 // Check if pointer is valid
-                if (auto listener = weakPtrIt->lock()) {
+                if (auto listener = weak_ptr_it->lock()) {
                     auto casted_listener = std::dynamic_pointer_cast<TestEventListener<TEvent>>(listener);
                     casted_listener->OnEvent(event, true);
-                    ++weakPtrIt;
+                    ++weak_ptr_it;
                 } else {
                     // Object no longer exists and should be removed from map
-                    weakPtrIt = listeners.erase(weakPtrIt); // Return an iterator to the next weak ptr if any
+                    weak_ptr_it = listeners.erase(weak_ptr_it); // Return an iterator to the next weak ptr if any
                 }
             }
 
@@ -93,7 +93,7 @@ namespace event_system {
     class TestEventEmitter : public EventEmitter {
     public:
         TestEventEmitter() = default;
-        TestEventEmitter(const std::shared_ptr<EventManager>& eventManager) : EventEmitter(eventManager) {}
+        TestEventEmitter(const std::shared_ptr<EventManager>& event_manager) : EventEmitter(event_manager) {}
         ~TestEventEmitter() = default;
 
         template <typename TEvent>
@@ -103,13 +103,12 @@ namespace event_system {
                 return;
             }
 
-            if (auto sharedManager = get_event_manager()) {
+            if (auto shared_manager = get_event_manager()) {
                 // cast manager to test manager
-                auto casted_manager = std::static_pointer_cast<TestEventManager>(sharedManager);
+                auto casted_manager = std::static_pointer_cast<TestEventManager>(shared_manager);
                 casted_manager->EmitEvent(event, true);
             }
         }
     };
-
 
 }

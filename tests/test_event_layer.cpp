@@ -21,9 +21,9 @@ public:
         std::cout << "Sample layer running\n";
 
         std::shared_ptr<EventListener<GeneralEvent>>
-                generalListener = std::make_shared<EventListener<GeneralEvent>>();
+                general_listener = std::make_shared<EventListener<GeneralEvent>>();
 
-        AddListener(generalListener);
+        AddListener(general_listener);
     }
 };
 
@@ -36,37 +36,37 @@ public:
         std::cout << "Sample layer running\n";
 
         std::shared_ptr<EventListener<GeneralEvent>>
-                generalListener = std::make_shared<EventListener<GeneralEvent>>();
+                general_listener = std::make_shared<EventListener<GeneralEvent>>();
 
-        AddListener(generalListener);
-        RemoveListener(generalListener);
+        AddListener(general_listener);
+        RemoveListener(general_listener);
     }
 };
 
 TEST(EventLayerTest, AddedListenerTest) {
-    AddListenerLayer eventLayer{};
+    AddListenerLayer event_layer{};
 
     // Start Run in a separate thread
-    std::thread runThread(&EventLayer::Run, &eventLayer);
+    std::thread run_thread(&EventLayer::Run, &event_layer);
     // Give time to set listeners
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    EXPECT_EQ(eventLayer.get_listener_count(), 1);
+    EXPECT_EQ(event_layer.get_listener_count(), 1);
 
-    eventLayer.Stop();
-    runThread.join();
+    event_layer.Stop();
+    run_thread.join();
 }
 
 TEST(EventLayerTest, RemovedListenerTest) {
-    RemoveListenerLayer eventLayer{};
+    RemoveListenerLayer event_layer{};
 
     // Start Run in a separate thread
-    std::thread runThread(&EventLayer::Run, &eventLayer);
+    std::thread run_thread(&EventLayer::Run, &event_layer);
     // Give time to set listeners
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    EXPECT_EQ(eventLayer.get_listener_count(), 0);
+    EXPECT_EQ(event_layer.get_listener_count(), 0);
 
-    eventLayer.Stop();
-    runThread.join();
+    event_layer.Stop();
+    run_thread.join();
 }

@@ -60,9 +60,9 @@ TEST_F(EventManagerTest, TriggerEventTest) {
     auto casted_listener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
     auto casted_manager = std::static_pointer_cast<TestEventManager>(local_event_manager);
 
-    EXPECT_FALSE(casted_listener->eventTriggered);
+    EXPECT_FALSE(casted_listener->event_triggered);
     casted_manager->EmitEvent<GeneralEvent>(general_event, true);
-    EXPECT_TRUE(casted_listener->eventTriggered);
+    EXPECT_TRUE(casted_listener->event_triggered);
 }
 
 TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
@@ -73,15 +73,15 @@ TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
     auto castedListener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
     auto castedListener2 = std::static_pointer_cast<TestEventListener<SpecificEvent>>(specificListener);
 
-    EXPECT_FALSE(castedListener->eventTriggered);
-    EXPECT_FALSE(castedListener2->eventTriggered);
+    EXPECT_FALSE(castedListener->event_triggered);
+    EXPECT_FALSE(castedListener2->event_triggered);
 
     GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
 
     auto casted_manager = std::static_pointer_cast<TestEventManager>(local_event_manager);
     casted_manager->EmitEvent<GeneralEvent>(generalEvent, true);
-    EXPECT_TRUE(castedListener->eventTriggered);
-    EXPECT_FALSE(castedListener2->eventTriggered);
+    EXPECT_TRUE(castedListener->event_triggered);
+    EXPECT_FALSE(castedListener2->event_triggered);
 }
 
 TEST_F(EventManagerTest, DanglingPointerTest) {
