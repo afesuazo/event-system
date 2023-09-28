@@ -15,20 +15,19 @@ public:
     enum class SubType {
         GeneralSubType0,
         GeneralSubType1,
-        GeneralSubType2
     };
 
-    explicit GeneralEvent(SubType subType) : subType_(subType) {
+    explicit GeneralEvent(SubType sub_type) : sub_type_(sub_type) {
         event_name = "GeneralEvent";
     }
 
     [[nodiscard]] int get_sub_type() const override {
-        return static_cast<int>(subType_);
+        return static_cast<int>(sub_type_);
     }
 
 
 private:
-    SubType subType_;
+    SubType sub_type_;
 };
 
 class SpecificEvent : public BaseEvent {
@@ -38,77 +37,45 @@ public:
         SpecificSubType1,
     };
 
-    explicit SpecificEvent(SubType subType) : subType_(subType) {
+    explicit SpecificEvent(SubType sub_type) : sub_type_(sub_type) {
         event_name = "SpecificEvent";
     }
 
     [[nodiscard]] int get_sub_type() const override {
-        return static_cast<int>(subType_);
+        return static_cast<int>(sub_type_);
     }
 
 private:
-    SubType subType_;
-};
-
-
-
-class GeneralEventListener : public IEventListener<GeneralEvent> {
-public:
-    void OnEvent(const GeneralEvent& event) override {
-        std::cout << "Received general event: " << event.get_sub_type() << std::endl;
-    }
-
-    void RegisterCallback(const std::function<void()>& callback) override {}
-
+    SubType sub_type_;
 };
 
 class SampleLayer1 : public EventLayer {
 public:
 
-    SampleLayer1() : EventLayer() {}
-
     void Run() override {
+        std::shared_ptr<EventListener<GeneralEvent>>
+                general_listener_1 = std::make_shared<EventListener<GeneralEvent>>();
 
-        std::shared_ptr<IEventListener<GeneralEvent>>
-                generalListener = std::make_shared<GeneralEventListener>();
+        AddListener(general_listener_1);
 
-        AddListener(generalListener);
+        GeneralEvent general_event_1{GeneralEvent::SubType::GeneralSubType1};
+        SpecificEvent specific_event_0{SpecificEvent::SubType::SpecificSubType0};
 
-        GeneralEvent generalEvent0{GeneralEvent::SubType::GeneralSubType0};
-        TriggerEvent(generalEvent0);
-    }
-
-};
-
-class SampleLayer2 : public EventLayer {
-public:
-
-    SampleLayer2() : EventLayer() {}
-
-    void Run() override {
-        std::shared_ptr<IEventListener<GeneralEvent>>
-                generalListener2 = std::make_shared<GeneralEventListener>();
-
-        AddListener(generalListener2);
-
-        GeneralEvent generalEvent1{GeneralEvent::SubType::GeneralSubType1};
-        SpecificEvent specificEvent0{SpecificEvent::SubType::SpecificSubType0};
-
-        TriggerEvent(specificEvent0); // Should not emit an event
-        TriggerEvent(generalEvent1);
+        TriggerEvent(specific_event_0); // Should not emit an event
+        TriggerEvent(general_event_1);
     }
 
 };
 
 int main() {
 
-    std::cout << "** Multiple Layer Event System Example **\n\n";
+    std::cout << "** Single Layer Event System Example **\n\n";
 
     // Set application layers
-    SampleLayer1 sampleLayer1{};
+    SampleLayer1 sample_layer_1{};
 
     // Add listeners to each layer
-    sampleLayer1.Run();
+    sample_layer_1.Run();
 
     return 0;
 }
