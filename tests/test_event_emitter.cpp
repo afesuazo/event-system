@@ -8,7 +8,7 @@
 #include "event_emitter.h"
 #include "testing_utils.h"
 
-using namespace event_manager;
+using namespace event_system;
 
 class SpecificOnlyEventEmitter : public EventEmitter {
 public:

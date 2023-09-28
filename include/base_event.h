@@ -6,7 +6,7 @@
 #include <typeindex>
 #include <string>
 
-namespace event_manager {
+namespace event_system {
 
     /**
      * @class BaseEvent

@@ -12,7 +12,7 @@
 #include <mutex>
 #include <atomic>
 
-namespace event_manager {
+namespace event_system {
 
     /**
      * @class EventLayer

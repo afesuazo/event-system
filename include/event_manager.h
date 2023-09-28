@@ -12,7 +12,7 @@
 #include <memory>
 #include <iostream>
 
-namespace event_manager {
+namespace event_system {
 
     /**
     * @brief Provides a method of communication between independent components

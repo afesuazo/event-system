@@ -8,7 +8,7 @@
 #include "event_emitter.h"
 #include <string>
 
-using namespace event_manager;
+using namespace event_system;
 
 class GeneralEvent : public BaseEvent {
 public:

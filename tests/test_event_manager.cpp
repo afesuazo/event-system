@@ -9,7 +9,7 @@
 #include "testing_utils.h"
 #include <memory>
 
-using namespace event_manager;
+using namespace event_system;
 
 class EventManagerTest : public ::testing::Test {
 protected:

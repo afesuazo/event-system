@@ -8,7 +8,7 @@
 #include "base_event.h"
 #include "event_handler.h"
 
-namespace event_manager {
+namespace event_system {
 
     /**
      * @class IEventListenerBase

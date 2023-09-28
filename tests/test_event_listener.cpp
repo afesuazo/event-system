@@ -7,7 +7,7 @@
 #include "event_listener.h"
 #include <memory>
 
-using namespace event_manager;
+using namespace event_system;
 
 class EventListenerTest : public ::testing::Test {
 protected:
