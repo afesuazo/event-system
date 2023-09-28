@@ -8,7 +8,7 @@
 #include "base_event.h"
 #include "event_handler.h"
 
-namespace event_manager {
+namespace event_system {
 
     /**
      * @class IEventListenerBase
@@ -67,7 +67,7 @@ namespace event_manager {
          * @param event Reference to the event (of type TEvent) that was triggered.
          */
         void OnEvent(const TEvent& event) {
-            std::type_index event_type = event.GetType();
+            std::type_index event_type = event.get_type();
             if (handlers.contains(event_type)) {
                 handlers[event_type]->HandleEvent(event);
             }

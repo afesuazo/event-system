@@ -12,7 +12,7 @@
 #include <mutex>
 #include <atomic>
 
-namespace event_manager {
+namespace event_system {
 
     /**
      * @class EventLayer
@@ -24,8 +24,8 @@ namespace event_manager {
     class EventLayer {
     public:
         EventLayer() {
-            eventManager = std::make_shared<EventManager>();
-            eventEmitter = EventEmitter{eventManager};
+            event_manager = std::make_shared<EventManager>();
+            event_emitter = EventEmitter{event_manager};
         }
 
         virtual ~EventLayer() = default;
@@ -46,7 +46,7 @@ namespace event_manager {
          */
         void Stop() {
             std::lock_guard<std::mutex> lock(mutex);
-            shouldStop = true;
+            should_stop = true;
         }
 
         /**
@@ -60,14 +60,14 @@ namespace event_manager {
         // For events sourced from external layers
         void OnEvent(const BaseEvent& event) {
             std::cout << "here";
-            eventManager->EmitEvent(event);
+            event_manager->EmitEvent(event);
         }
 
         /**
          * @brief Returns the name of the layer
          */
-        std::string GetLayerName() {
-            return layerName;
+        std::string get_layer_name() const {
+            return layer_name;
         }
 
         /**
@@ -75,8 +75,8 @@ namespace event_manager {
          *
          * @returns size_t representing the total active listeners
          */
-        size_t GetListenerCount() {
-            return eventManager->GetSubscriberCount();
+        size_t get_listener_count() const {
+            return event_manager->get_subscriber_count();
         }
 
     protected:
@@ -88,7 +88,7 @@ namespace event_manager {
          */
         template<typename TEvent>
         void AddListener(const std::shared_ptr<EventListener<TEvent>>& listener) {
-            eventManager->AddSubscriber(listener);
+            event_manager->AddSubscriber(listener);
         }
 
         /**
@@ -98,7 +98,7 @@ namespace event_manager {
          */
         template<typename TEvent>
         void RemoveListener(const std::shared_ptr<EventListener<TEvent>>& listener) {
-            eventManager->RemoveSubscriber(listener);
+            event_manager->RemoveSubscriber(listener);
         }
 
         // TODO: Default to all or none?
@@ -113,7 +113,7 @@ namespace event_manager {
          */
         bool ShouldStop() {
             std::lock_guard<std::mutex> lock(mutex);
-            return shouldStop;
+            return should_stop;
         }
 
         /**
@@ -125,7 +125,7 @@ namespace event_manager {
          * @param event The event to emit.
          */
         void TriggerEvent(const BaseEvent& event) {
-            eventEmitter.Emit(event);
+            event_emitter.Emit(event);
         }
 
         /**
@@ -133,19 +133,19 @@ namespace event_manager {
          *
          * @param name The name of the layer.
          */
-        void SetLayerName(const std::string& name) {
-            layerName = name;
+        void set_layer_name(const std::string& name) {
+            layer_name = name;
         }
 
     private:
         // Points to the shared event manager
-        std::shared_ptr<EventManager> eventManager;
+        std::shared_ptr<EventManager> event_manager;
         // Used to emit local and global events
-        EventEmitter eventEmitter;
-        std::string layerName;
+        EventEmitter event_emitter;
+        std::string layer_name;
 
         std::mutex mutex;
-        std::atomic<bool> shouldStop;
+        std::atomic<bool> should_stop;
     };
 
 }

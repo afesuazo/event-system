@@ -7,7 +7,7 @@
 #include "event_manager.h"
 #include "base_event.h"
 
-namespace event_manager {
+namespace event_system {
 
     /**
      * @class EventEmitter
@@ -21,8 +21,8 @@ namespace event_manager {
 
         EventEmitter() = default;
 
-        explicit EventEmitter(const std::shared_ptr<EventManager>& eventManager) :
-        eventManager(eventManager) {}
+        explicit EventEmitter(const std::shared_ptr<EventManager>& manager) :
+                event_manager(manager) {}
 
         virtual ~EventEmitter() = default;
 
@@ -41,13 +41,13 @@ namespace event_manager {
                 return;
             }
 
-            if (auto sharedManager = eventManager.lock()) {
-                sharedManager->EmitEvent(event);
+            if (auto shared_manager = event_manager.lock()) {
+                shared_manager->EmitEvent(event);
             }
         }
 
         std::shared_ptr<EventManager> get_event_manager() {
-            return eventManager.lock();
+            return event_manager.lock();
         }
 
     protected:
@@ -63,7 +63,7 @@ namespace event_manager {
         }
 
     private:
-        std::weak_ptr<EventManager> eventManager;
+        std::weak_ptr<EventManager> event_manager;
     };
 
 }

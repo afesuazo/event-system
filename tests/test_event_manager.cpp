@@ -9,7 +9,7 @@
 #include "testing_utils.h"
 #include <memory>
 
-using namespace event_manager;
+using namespace event_system;
 
 class EventManagerTest : public ::testing::Test {
 protected:
@@ -28,9 +28,9 @@ TEST_F(EventManagerTest, AddSubscriberTest) {
 }
 
 TEST_F(EventManagerTest, AddDuplicateSubscriberTest) {
-    ASSERT_EQ(local_event_manager->GetSubscriberCount(), 0);
+    ASSERT_EQ(local_event_manager->get_subscriber_count(), 0);
     local_event_manager->AddSubscriber(general_event_listener);
-    ASSERT_EQ(local_event_manager->GetSubscriberCount(), 1);
+    ASSERT_EQ(local_event_manager->get_subscriber_count(), 1);
 }
 
 TEST_F(EventManagerTest, MultipleSubscriberTest) {
@@ -38,15 +38,15 @@ TEST_F(EventManagerTest, MultipleSubscriberTest) {
     std::shared_ptr<EventListener<GeneralEvent>> generalListener2 = std::make_shared<TestEventListener<GeneralEvent>>();
     local_event_manager->AddSubscriber(generalListener2);
 
-    ASSERT_EQ(local_event_manager->GetSubscriberCount(), 2);
-    ASSERT_EQ(local_event_manager->GetSubscriberCount<BaseEvent>(), 0);
+    ASSERT_EQ(local_event_manager->get_subscriber_count(), 2);
+    ASSERT_EQ(local_event_manager->get_subscriber_count<BaseEvent>(), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberTest) {
     local_event_manager->AddSubscriber(general_event_listener);
-    ASSERT_EQ(local_event_manager->GetSubscriberCount(), 1);
+    ASSERT_EQ(local_event_manager->get_subscriber_count(), 1);
     local_event_manager->RemoveSubscriber<GeneralEvent>(general_event_listener);
-    ASSERT_EQ(local_event_manager->GetSubscriberCount(), 0);
+    ASSERT_EQ(local_event_manager->get_subscriber_count(), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberFromEmptyMapTest) {
@@ -60,9 +60,9 @@ TEST_F(EventManagerTest, TriggerEventTest) {
     auto casted_listener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
     auto casted_manager = std::static_pointer_cast<TestEventManager>(local_event_manager);
 
-    EXPECT_FALSE(casted_listener->eventTriggered);
+    EXPECT_FALSE(casted_listener->event_triggered);
     casted_manager->EmitEvent<GeneralEvent>(general_event, true);
-    EXPECT_TRUE(casted_listener->eventTriggered);
+    EXPECT_TRUE(casted_listener->event_triggered);
 }
 
 TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
@@ -73,15 +73,15 @@ TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
     auto castedListener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
     auto castedListener2 = std::static_pointer_cast<TestEventListener<SpecificEvent>>(specificListener);
 
-    EXPECT_FALSE(castedListener->eventTriggered);
-    EXPECT_FALSE(castedListener2->eventTriggered);
+    EXPECT_FALSE(castedListener->event_triggered);
+    EXPECT_FALSE(castedListener2->event_triggered);
 
     GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
 
     auto casted_manager = std::static_pointer_cast<TestEventManager>(local_event_manager);
     casted_manager->EmitEvent<GeneralEvent>(generalEvent, true);
-    EXPECT_TRUE(castedListener->eventTriggered);
-    EXPECT_FALSE(castedListener2->eventTriggered);
+    EXPECT_TRUE(castedListener->event_triggered);
+    EXPECT_FALSE(castedListener2->event_triggered);
 }
 
 TEST_F(EventManagerTest, DanglingPointerTest) {
@@ -92,5 +92,5 @@ TEST_F(EventManagerTest, DanglingPointerTest) {
     auto casted_manager = std::static_pointer_cast<TestEventManager>(local_event_manager);
     casted_manager->EmitEvent<GeneralEvent>(generalEvent, true);
 
-    ASSERT_EQ(local_event_manager->GetSubscriberCount<GeneralEvent>(), 0);
+    ASSERT_EQ(local_event_manager->get_subscriber_count<GeneralEvent>(), 0);
 }

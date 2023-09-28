@@ -12,7 +12,7 @@
 #include <memory>
 #include <iostream>
 
-namespace event_manager {
+namespace event_system {
 
     /**
     * @brief Provides a method of communication between independent components
@@ -64,16 +64,16 @@ namespace event_manager {
         void RemoveSubscriber(const std::shared_ptr<EventListener<TEvent>>& listener) {
 
             // Check if key exists to avoid creating an empty vector
-            auto it = GetEventMapIterator(typeid(TEvent));
+            auto it = get_event_map_iterator(typeid(TEvent));
             // No key found, nothing to remove
             if (it == subscribers.end()) { return; }
 
             auto &listeners = it->second;
             it->second.erase(std::remove_if(listeners.begin(), listeners.end(), [&listener](
-                    const std::weak_ptr<IEventListenerBase> &listenerWeakPtr) {
-                auto sharedPtr = listenerWeakPtr.lock();
+                    const std::weak_ptr<IEventListenerBase> &listener_weak_ptr) {
+                auto shared_ptr = listener_weak_ptr.lock();
                 // Also check if pointer is still valid
-                return !sharedPtr || sharedPtr == listener;
+                return !shared_ptr || shared_ptr == listener;
             }), listeners.end());
 
 #ifdef ENABLE_SAFETY_CHECKS
@@ -96,7 +96,7 @@ namespace event_manager {
         void EmitEvent(const TEvent &event) {
 
             // Without this check, an empty vector would be created, and we would loop over an empty container
-            auto it = GetEventMapIterator(typeid(event));
+            auto it = get_event_map_iterator(typeid(event));
             if (it == subscribers.end()) { return; }
 
             // Iterate through the collection of weak_pointers
@@ -104,14 +104,14 @@ namespace event_manager {
             // If we can't lock the pointer,
 
             auto& listeners = it->second;
-            for (auto weakPtrIt = listeners.begin(); weakPtrIt != listeners.end();) {
+            for (auto weak_ptr_it = listeners.begin(); weak_ptr_it != listeners.end();) {
                 // Check if pointer is valid
-                if (auto listener = weakPtrIt->lock()) {
+                if (auto listener = weak_ptr_it->lock()) {
                     listener->OnEvent(event);
-                    ++weakPtrIt;
+                    ++weak_ptr_it;
                 } else {
                     // Object no longer exists and should be removed from map
-                    weakPtrIt = listeners.erase(weakPtrIt); // Return an iterator to the next weak ptr if any
+                    weak_ptr_it = listeners.erase(weak_ptr_it); // Return an iterator to the next weak ptr if any
                 }
             }
 
@@ -127,7 +127,7 @@ namespace event_manager {
         template<typename TEvent>
         bool SubscriptionExists(const std::shared_ptr<EventListener<TEvent>>& listener) const {
 
-            // GetEventMapIterator() not used to keep this as const method
+            // get_event_map_iterator() not used to keep this as const method
             auto it = subscribers.find(typeid(TEvent));
             if (it == subscribers.end()) { return false; }
 
@@ -137,12 +137,12 @@ namespace event_manager {
             return std::any_of(
                     listeners.begin(),
                     listeners.end(),
-                    [&listener](const std::weak_ptr<IEventListenerBase> &listenerWeakPtr) {
-                        return listenerWeakPtr.lock() == listener;
+                    [&listener](const std::weak_ptr<IEventListenerBase> &listener_weak_ptr) {
+                        return listener_weak_ptr.lock() == listener;
                     });
         }
 
-        [[nodiscard]] size_t GetSubscriberCount() const {
+        [[nodiscard]] size_t get_subscriber_count() const {
             size_t count{0};
             for (const auto& event_type : subscribers) {
                 count += event_type.second.size();
@@ -151,7 +151,7 @@ namespace event_manager {
         }
 
         template<typename TEvent>
-        [[nodiscard]] size_t GetSubscriberCount() const {
+        [[nodiscard]] size_t get_subscriber_count() const {
             auto it = subscribers.find(typeid(TEvent));
             if (it == subscribers.end()) { return 0; }
 
@@ -167,7 +167,7 @@ namespace event_manager {
          */
         // Marked as nodiscard as return value should be used immediately
         [[nodiscard]]
-        EventSubscriberMap::iterator GetEventMapIterator (const std::type_index& type) {
+        EventSubscriberMap::iterator get_event_map_iterator (const std::type_index& type) {
             auto it = subscribers.find(type);
             if (it != subscribers.end()) {
                 return it;

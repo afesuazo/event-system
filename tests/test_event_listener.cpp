@@ -7,7 +7,7 @@
 #include "event_listener.h"
 #include <memory>
 
-using namespace event_manager;
+using namespace event_system;
 
 class EventListenerTest : public ::testing::Test {
 protected:
@@ -23,5 +23,5 @@ TEST_F(EventListenerTest, DerivedOnEventTriggeredTest) {
     auto casted_general_event_listener = std::dynamic_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
     casted_general_event_listener->OnEvent(general_event, true);
 
-    EXPECT_TRUE(casted_general_event_listener->eventTriggered);
+    EXPECT_TRUE(casted_general_event_listener->event_triggered);
 }
