@@ -38,13 +38,27 @@ namespace event_manager {
      * @tparam TEvent The event type this listener is intended to subscribe to
      */
     template<typename TEvent>
-    class EventListener {
+    class EventListener : public IEventListenerBase {
         static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be be derived from BaseEvent");
     public:
-        virtual ~EventListener() = default;
+         ~EventListener() override = default;
 
-        void RegisterHandler(std::type_index event_type, std::unique_ptr<EventHandler> handler) {
+        void RegisterHandler(std::type_index event_type, std::unique_ptr<IEventHandler> handler) {
             handlers[event_type] = std::move(handler);
+        }
+
+        /**
+         * @brief Overridden method to handle type-erasure. Will immediately call the expected OnEvent method.
+         *
+         * Dynamically casts the event reference to the expected event type (TEvent). If types match,
+         * a virtual OnEvent function with the same signature gets called.
+         *
+         * @param event The event that was triggered.
+         */
+        void OnEvent(const BaseEvent& event) override {
+            if (typeid(event) == typeid(TEvent)) {
+                OnEvent(static_cast<const TEvent&>(event));
+            }
         }
 
         /**
@@ -60,7 +74,7 @@ namespace event_manager {
         }
 
     private:
-        std::unordered_map<std::type_index, std::unique_ptr<EventHandler>> handlers;
+        std::unordered_map<std::type_index, std::unique_ptr<IEventHandler>> handlers;
     };
 
 

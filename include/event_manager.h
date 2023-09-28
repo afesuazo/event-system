@@ -107,7 +107,7 @@ namespace event_manager {
             for (auto weakPtrIt = listeners.begin(); weakPtrIt != listeners.end();) {
                 // Check if pointer is valid
                 if (auto listener = weakPtrIt->lock()) {
-                    listener->OnEvent(static_cast<const BaseEvent &>(event));
+                    listener->OnEvent(event);
                     ++weakPtrIt;
                 } else {
                     // Object no longer exists and should be removed from map
@@ -158,7 +158,7 @@ namespace event_manager {
             return it->second.size();
         }
 
-    private:
+    protected:
         /**
          * @brief Checks if an event type is part of the internal map
          *

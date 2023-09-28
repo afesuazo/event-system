@@ -2,7 +2,15 @@
 // Created by Andres Suazo
 //
 
-#ifndef EVENT_MANAGER_EVENT_HANDLER_H
-#define EVENT_MANAGER_EVENT_HANDLER_H
+#pragma once
+#include "base_event.h"
 
-#endif //EVENT_MANAGER_EVENT_HANDLER_H
+namespace event_manager {
+
+    class IEventHandler {
+    public:
+        virtual ~IEventHandler() = default;
+        virtual void HandleEvent(const BaseEvent& event) = 0;
+    };
+
+}
