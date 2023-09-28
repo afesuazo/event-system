@@ -51,7 +51,7 @@ TEST(EventLayerTest, AddedListenerTest) {
     // Give time to set listeners
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    EXPECT_EQ(eventLayer.GetListenerCount(), 1);
+    EXPECT_EQ(eventLayer.get_listener_count(), 1);
 
     eventLayer.Stop();
     runThread.join();
@@ -65,7 +65,7 @@ TEST(EventLayerTest, RemovedListenerTest) {
     // Give time to set listeners
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    EXPECT_EQ(eventLayer.GetListenerCount(), 0);
+    EXPECT_EQ(eventLayer.get_listener_count(), 0);
 
     eventLayer.Stop();
     runThread.join();

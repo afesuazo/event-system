@@ -142,7 +142,7 @@ namespace event_system {
                     });
         }
 
-        [[nodiscard]] size_t GetSubscriberCount() const {
+        [[nodiscard]] size_t get_subscriber_count() const {
             size_t count{0};
             for (const auto& event_type : subscribers) {
                 count += event_type.second.size();
@@ -151,7 +151,7 @@ namespace event_system {
         }
 
         template<typename TEvent>
-        [[nodiscard]] size_t GetSubscriberCount() const {
+        [[nodiscard]] size_t get_subscriber_count() const {
             auto it = subscribers.find(typeid(TEvent));
             if (it == subscribers.end()) { return 0; }
 
