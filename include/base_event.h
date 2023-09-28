@@ -24,7 +24,7 @@ namespace event_manager {
             return typeid(this); // Class Type
         };
 
-        [[nodiscard]] std::string getName() const {
+        [[nodiscard]] std::string GetName() const {
             return eventName;
         };
 

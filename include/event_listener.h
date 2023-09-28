@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "base_event.h"
+#include "event_handler.h"
 
 namespace event_manager {
 
@@ -16,7 +17,7 @@ namespace event_manager {
      * Provides a base interface for all event listeners. This allows us to easily create containers for
      * EventListeners and handle multiple types of events in a uniform manner.
      *
-     * @note Should not be inherited from directly, instead use IEventListener
+     * @note Should not be inherited from directly, instead use EventListener
      */
     class IEventListenerBase {
     public:
@@ -31,39 +32,36 @@ namespace event_manager {
     };
 
     /**
-     * @class IEventListener
-     * @brief Templated interface for creating a listener of a specific event type
+     * @class EventListener
+     * @brief Templated class for creating a listener of a specific event type
      *
      * @tparam TEvent The event type this listener is intended to subscribe to
-     * @note The `TEvent` type must be derived from `IEvent`
      */
     template<typename TEvent>
-    class IEventListener : public IEventListenerBase {
-        static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be be derived from IEvent");
+    class EventListener {
+        static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be be derived from BaseEvent");
     public:
+        virtual ~EventListener() = default;
 
-        /**
-         * @brief Overridden method to handle type-erasure. Will immediately call the expected OnEvent method.
-         *
-         * Dynamically casts the event reference to the expected event type (TEvent). If types match,
-         * a virtual OnEvent function with the same signature gets called.
-         *
-         * @param event The event that was triggered.
-         */
-        void OnEvent(const BaseEvent& event) override {
-            if (typeid(event) == typeid(TEvent)) {
-                OnEvent(static_cast<const TEvent&>(event));
-            }
+        void RegisterHandler(std::type_index event_type, std::unique_ptr<EventHandler> handler) {
+            handlers[event_type] = std::move(handler);
         }
-
-        virtual void RegisterCallback(const std::function<void()>&) = 0;
 
         /**
          * @brief Called when an event this listener subscribed to is triggered
          *
          * @param event Reference to the event (of type TEvent) that was triggered.
          */
-        virtual void OnEvent(const TEvent& event) = 0;
+        void OnEvent(const TEvent& event) {
+            std::type_index event_type = event.GetType();
+            if (handlers.contains(event_type)) {
+                handlers[event_type]->HandleEvent(event);
+            }
+        }
+
+    private:
+        std::unordered_map<std::type_index, std::unique_ptr<EventHandler>> handlers;
     };
+
 
 }

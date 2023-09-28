@@ -1,0 +1,8 @@
+//
+// Created by Andres Suazo
+//
+
+#ifndef EVENT_MANAGER_EVENT_HANDLER_H
+#define EVENT_MANAGER_EVENT_HANDLER_H
+
+#endif //EVENT_MANAGER_EVENT_HANDLER_H
