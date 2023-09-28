@@ -67,7 +67,7 @@ namespace event_system {
         void EmitEvent(const TEvent &event, bool is_test) {
 
             // Without this check, an empty vector would be created, and we would loop over an empty container
-            auto it = GetEventMapIterator(typeid(event));
+            auto it = get_event_map_iterator(typeid(event));
             if (it == subscribers.end()) { return; }
 
             // Iterate through the collection of weak_pointers
