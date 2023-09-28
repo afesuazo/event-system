@@ -46,6 +46,10 @@ namespace event_manager {
             }
         }
 
+        std::shared_ptr<EventManager> get_event_manager() {
+            return eventManager.lock();
+        }
+
     protected:
         /**
          * @brief Checks if this object is allowed to emit the given event

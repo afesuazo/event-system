@@ -20,8 +20,8 @@ public:
     void Run() override {
         std::cout << "Sample layer running\n";
 
-        std::shared_ptr<IEventListener<GeneralEvent>>
-                generalListener = std::make_shared<GeneralEventListener>();
+        std::shared_ptr<EventListener<GeneralEvent>>
+                generalListener = std::make_shared<EventListener<GeneralEvent>>();
 
         AddListener(generalListener);
     }
@@ -35,8 +35,8 @@ public:
     void Run() override {
         std::cout << "Sample layer running\n";
 
-        std::shared_ptr<IEventListener<GeneralEvent>>
-                generalListener = std::make_shared<GeneralEventListener>();
+        std::shared_ptr<EventListener<GeneralEvent>>
+                generalListener = std::make_shared<EventListener<GeneralEvent>>();
 
         AddListener(generalListener);
         RemoveListener(generalListener);

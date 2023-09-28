@@ -39,7 +39,7 @@ namespace event_manager {
          * previously registered, it will be registered with the given listener as its only subscriber.
          */
         template<typename TEvent>
-        void AddSubscriber(const std::shared_ptr<IEventListener<TEvent>>& listener) {
+        void AddSubscriber(const std::shared_ptr<EventListener<TEvent>>& listener) {
 
 #ifdef ENABLE_SAFETY_CHECKS
             if (!SubscriptionExists(listener)) {
@@ -61,7 +61,7 @@ namespace event_manager {
          * after removing the listener, the event will be removed from the map
          */
         template<typename TEvent>
-        void RemoveSubscriber(const std::shared_ptr<IEventListener<TEvent>>& listener) {
+        void RemoveSubscriber(const std::shared_ptr<EventListener<TEvent>>& listener) {
 
             // Check if key exists to avoid creating an empty vector
             auto it = GetEventMapIterator(typeid(TEvent));
@@ -107,7 +107,7 @@ namespace event_manager {
             for (auto weakPtrIt = listeners.begin(); weakPtrIt != listeners.end();) {
                 // Check if pointer is valid
                 if (auto listener = weakPtrIt->lock()) {
-                    listener->OnEvent(static_cast<const BaseEvent &>(event));
+                    listener->OnEvent(event);
                     ++weakPtrIt;
                 } else {
                     // Object no longer exists and should be removed from map
@@ -125,7 +125,7 @@ namespace event_manager {
          * @return True if there is a listener subscribed to the event type
          */
         template<typename TEvent>
-        bool SubscriptionExists(const std::shared_ptr<IEventListener<TEvent>>& listener) const {
+        bool SubscriptionExists(const std::shared_ptr<EventListener<TEvent>>& listener) const {
 
             // GetEventMapIterator() not used to keep this as const method
             auto it = subscribers.find(typeid(TEvent));
@@ -143,9 +143,9 @@ namespace event_manager {
         }
 
         [[nodiscard]] size_t GetSubscriberCount() const {
-            int count{0};
-            for (const auto& eventType : subscribers) {
-                count += eventType.second.size();
+            size_t count{0};
+            for (const auto& event_type : subscribers) {
+                count += event_type.second.size();
             }
             return count;
         }
@@ -158,7 +158,7 @@ namespace event_manager {
             return it->second.size();
         }
 
-    private:
+    protected:
         /**
          * @brief Checks if an event type is part of the internal map
          *

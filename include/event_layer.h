@@ -87,7 +87,7 @@ namespace event_manager {
          * @param listener A reference to the listener object to add.
          */
         template<typename TEvent>
-        void AddListener(const std::shared_ptr<IEventListener<TEvent>>& listener) {
+        void AddListener(const std::shared_ptr<EventListener<TEvent>>& listener) {
             eventManager->AddSubscriber(listener);
         }
 
@@ -97,7 +97,7 @@ namespace event_manager {
          * @param listener A reference to the listener object to remove.
          */
         template<typename TEvent>
-        void RemoveListener(const std::shared_ptr<IEventListener<TEvent>>& listener) {
+        void RemoveListener(const std::shared_ptr<EventListener<TEvent>>& listener) {
             eventManager->RemoveSubscriber(listener);
         }
 

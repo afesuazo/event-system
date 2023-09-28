@@ -23,27 +23,27 @@ protected:
 class EventEmitterTest : public ::testing::Test {
 protected:
     std::shared_ptr<EventManager> eventManager;
-    EventEmitter eventEmitter;
+    TestEventEmitter eventEmitter;
 
     void SetUp() override {
-        eventManager = std::make_shared<EventManager>();
-        eventEmitter = EventEmitter{eventManager};
+        eventManager = std::make_shared<TestEventManager>();
+        eventEmitter = TestEventEmitter{eventManager};
     }
 };
 
 TEST_F(EventEmitterTest, ValidEventEmissionTest) {
-    std::shared_ptr<IEventListener<GeneralEvent>> generalEventListener = std::make_shared<GeneralEventListener>();
+    std::shared_ptr<EventListener<GeneralEvent>> generalEventListener = std::make_shared<TestEventListener<GeneralEvent>>();
     eventManager->AddSubscriber(generalEventListener);
 
     GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
-    eventEmitter.Emit(generalEvent);
+    eventEmitter.Emit(generalEvent, true);
 
-    auto castedListener = std::static_pointer_cast<GeneralEventListener>(generalEventListener);
+    auto castedListener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(generalEventListener);
     EXPECT_TRUE(castedListener->eventTriggered);
 }
 
 TEST_F(EventEmitterTest, InvalidEventEmissionTest) {
-    std::shared_ptr<IEventListener<GeneralEvent>> generalEventListener = std::make_shared<GeneralEventListener>();
+    std::shared_ptr<EventListener<GeneralEvent>> generalEventListener = std::make_shared<TestEventListener<GeneralEvent>>();
     eventManager->AddSubscriber(generalEventListener);
 
     GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
@@ -51,6 +51,6 @@ TEST_F(EventEmitterTest, InvalidEventEmissionTest) {
 
     specificEventEmitter.Emit(generalEvent);
 
-    auto castedListener = std::static_pointer_cast<GeneralEventListener>(generalEventListener);
+    auto castedListener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(generalEventListener);
     EXPECT_FALSE(castedListener->eventTriggered);
 }
