@@ -24,7 +24,7 @@ namespace event_system {
     class EventManager {
     public:
         // Using weak_ptr to be able to confirm the existence of the object before use
-        using EventSubscriberMap = std::unordered_map<std::type_index, std::vector<std::weak_ptr<IEventListenerBase>>>;
+        using EventSubscriberMap = std::unordered_map<std::type_index, std::vector<std::weak_ptr<IEventListener>>>;
 
         EventManager() = default;
         ~EventManager() = default;
@@ -45,7 +45,7 @@ namespace event_system {
             if (!SubscriptionExists(listener)) {
 #endif
                 // Adding a new key creates a default initialized vector
-                subscribers[typeid(TEvent)].push_back(listener);
+                subscribers_[typeid(TEvent)].push_back(listener);
 #ifdef ENABLE_SAFETY_CHECKS
             }
 #endif
@@ -57,20 +57,20 @@ namespace event_system {
          * @tparam TEvent The type of the event to unsubscribe from.
          * @param listener Pointer to the listener object unsubscribing from the event.
          *
-         * Removes a listener from the subscriber list tied to the event type. If there are no subscribers left
+         * Removes a listener from the subscriber list tied to the event type. If there are no subscribers_ left
          * after removing the listener, the event will be removed from the map
          */
         template<typename TEvent>
         void RemoveSubscriber(const std::shared_ptr<EventListener<TEvent>>& listener) {
 
             // Check if key exists to avoid creating an empty vector
-            auto it = get_event_map_iterator(typeid(TEvent));
+            auto it = subscribers_.find(typeid(TEvent));
             // No key found, nothing to remove
-            if (it == subscribers.end()) { return; }
+            if (it == subscribers_.end()) { return; }
 
             auto &listeners = it->second;
             it->second.erase(std::remove_if(listeners.begin(), listeners.end(), [&listener](
-                    const std::weak_ptr<IEventListenerBase> &listener_weak_ptr) {
+                    const std::weak_ptr<IEventListener> &listener_weak_ptr) {
                 auto shared_ptr = listener_weak_ptr.lock();
                 // Also check if pointer is still valid
                 return !shared_ptr || shared_ptr == listener;
@@ -79,7 +79,7 @@ namespace event_system {
 #ifdef ENABLE_SAFETY_CHECKS
             // Make sure we don't leave unused keys and empty vectors
             if (listeners.empty()) {
-                subscribers.erase(it);
+                subscribers_.erase(it);
             }
 #endif
         }
@@ -90,14 +90,14 @@ namespace event_system {
          * @tparam TEvent The type of the event to trigger.
          * @param event Reference to the event object to trigger.
          *
-         * Informs all subscribers for the given event type that the event has been triggered.
+         * Informs all subscribers_ for the given event type that the event has been triggered.
          */
         template<typename TEvent>
         void EmitEvent(const TEvent &event) {
 
             // Without this check, an empty vector would be created, and we would loop over an empty container
-            auto it = get_event_map_iterator(typeid(event));
-            if (it == subscribers.end()) { return; }
+            auto it = subscribers_.find(typeid(TEvent));
+            if (it == subscribers_.end()) { return; }
 
             // Iterate through the collection of weak_pointers
             // If we can lock the pointer, call the OnEvent method on the listener
@@ -128,23 +128,22 @@ namespace event_system {
         bool SubscriptionExists(const std::shared_ptr<EventListener<TEvent>>& listener) const {
 
             // get_event_map_iterator() not used to keep this as const method
-            auto it = subscribers.find(typeid(TEvent));
-            if (it == subscribers.end()) { return false; }
+            auto it = subscribers_.find(typeid(TEvent));
+            if (it == subscribers_.end()) { return false; }
 
             auto &listeners = it->second;
-
             // Using lambda for comparison between weak_ptr and shared_ptr
             return std::any_of(
                     listeners.begin(),
                     listeners.end(),
-                    [&listener](const std::weak_ptr<IEventListenerBase> &listener_weak_ptr) {
+                    [&listener](const std::weak_ptr<IEventListener> &listener_weak_ptr) {
                         return listener_weak_ptr.lock() == listener;
                     });
         }
 
         [[nodiscard]] size_t get_subscriber_count() const {
             size_t count{0};
-            for (const auto& event_type : subscribers) {
+            for (const auto& event_type : subscribers_) {
                 count += event_type.second.size();
             }
             return count;
@@ -152,31 +151,15 @@ namespace event_system {
 
         template<typename TEvent>
         [[nodiscard]] size_t get_subscriber_count() const {
-            auto it = subscribers.find(typeid(TEvent));
-            if (it == subscribers.end()) { return 0; }
+            auto it = subscribers_.find(typeid(TEvent));
+            if (it == subscribers_.end()) { return 0; }
 
             return it->second.size();
         }
 
     protected:
-        /**
-         * @brief Checks if an event type is part of the internal map
-         *
-         * @param type The type index of the event type.
-         * @return An iterator to the event type or end() if none is found.
-         */
-        // Marked as nodiscard as return value should be used immediately
-        [[nodiscard]]
-        EventSubscriberMap::iterator get_event_map_iterator (const std::type_index& type) {
-            auto it = subscribers.find(type);
-            if (it != subscribers.end()) {
-                return it;
-            }
-            return subscribers.end();
-        }
-
         //TODO: Compare performance to list
-        EventSubscriberMap subscribers;
+        EventSubscriberMap subscribers_;
 
     };
 

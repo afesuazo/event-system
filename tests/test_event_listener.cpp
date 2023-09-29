@@ -19,8 +19,8 @@ protected:
 };
 
 TEST_F(EventListenerTest, DerivedOnEventTriggeredTest) {
-    GeneralEvent general_event{GeneralEvent::SubType::GeneralSubType0};
-    auto casted_general_event_listener = std::dynamic_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
+    GeneralEvent general_event{GeneralEvents::GeneralSubType0};
+    std::shared_ptr<TestEventListener<GeneralEvent>>  casted_general_event_listener = std::dynamic_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
     casted_general_event_listener->OnEvent(general_event, true);
 
     EXPECT_TRUE(casted_general_event_listener->event_triggered);

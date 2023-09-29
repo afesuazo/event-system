@@ -5,7 +5,6 @@
 #include "gtest/gtest.h"
 #include "event_manager.h"
 #include "base_event.h"
-#include "event_listener.h"
 #include "testing_utils.h"
 #include <memory>
 
@@ -55,7 +54,7 @@ TEST_F(EventManagerTest, RemoveSubscriberFromEmptyMapTest) {
 
 TEST_F(EventManagerTest, TriggerEventTest) {
     local_event_manager->AddSubscriber(general_event_listener);
-    GeneralEvent general_event{GeneralEvent::SubType::GeneralSubType0};
+    GeneralEvent general_event{GeneralEvents::GeneralSubType0};
 
     auto casted_listener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
     auto casted_manager = std::static_pointer_cast<TestEventManager>(local_event_manager);
@@ -76,7 +75,7 @@ TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
     EXPECT_FALSE(castedListener->event_triggered);
     EXPECT_FALSE(castedListener2->event_triggered);
 
-    GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
+    GeneralEvent generalEvent{GeneralEvents::GeneralSubType0};
 
     auto casted_manager = std::static_pointer_cast<TestEventManager>(local_event_manager);
     casted_manager->EmitEvent<GeneralEvent>(generalEvent, true);
@@ -88,7 +87,7 @@ TEST_F(EventManagerTest, DanglingPointerTest) {
     local_event_manager->AddSubscriber(general_event_listener);
     general_event_listener.reset();
 
-    GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
+    GeneralEvent generalEvent{GeneralEvents::GeneralSubType0};
     auto casted_manager = std::static_pointer_cast<TestEventManager>(local_event_manager);
     casted_manager->EmitEvent<GeneralEvent>(generalEvent, true);
 

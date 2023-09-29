@@ -23,7 +23,7 @@ public:
         std::shared_ptr<EventListener<GeneralEvent>>
                 general_listener = std::make_shared<EventListener<GeneralEvent>>();
 
-        AddListener(general_listener);
+        AddEventListener(general_listener);
     }
 };
 
@@ -38,8 +38,8 @@ public:
         std::shared_ptr<EventListener<GeneralEvent>>
                 general_listener = std::make_shared<EventListener<GeneralEvent>>();
 
-        AddListener(general_listener);
-        RemoveListener(general_listener);
+        AddEventListener(general_listener);
+        RemoveEventListener(general_listener);
     }
 };
 

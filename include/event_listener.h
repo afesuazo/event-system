@@ -7,11 +7,12 @@
 #include <iostream>
 #include "base_event.h"
 #include "event_handler.h"
+#include <unordered_set>
 
 namespace event_system {
 
     /**
-     * @class IEventListenerBase
+     * @class IEventListener
      * @brief Interface for all event listeners, intended for polymorphism.
      *
      * Provides a base interface for all event listeners. This allows us to easily create containers for
@@ -19,9 +20,9 @@ namespace event_system {
      *
      * @note Should not be inherited from directly, instead use EventListener
      */
-    class IEventListenerBase {
+    class IEventListener {
     public:
-        virtual ~IEventListenerBase() = default;
+        virtual ~IEventListener() = default;
 
         /**
          * @brief Called when an event this listener subscribed to is triggered
@@ -38,13 +39,14 @@ namespace event_system {
      * @tparam TEvent The event type this listener is intended to subscribe to
      */
     template<typename TEvent>
-    class EventListener : public IEventListenerBase {
+    class EventListener : public IEventListener {
         static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be be derived from BaseEvent");
     public:
          ~EventListener() override = default;
 
         void RegisterHandler(std::type_index event_type, std::unique_ptr<IEventHandler> handler) {
-            handlers[event_type] = std::move(handler);
+            // TODO: Verify event_type is derived from BaseEvent and event handler is made for said event
+            handlers_.insert(std::move(handler));
         }
 
         /**
@@ -57,7 +59,7 @@ namespace event_system {
          */
         void OnEvent(const BaseEvent& event) override {
             if (typeid(event) == typeid(TEvent)) {
-                OnEvent(static_cast<const TEvent&>(event));
+                HandleEvent(static_cast<const TEvent&>(event));
             }
         }
 
@@ -66,15 +68,14 @@ namespace event_system {
          *
          * @param event Reference to the event (of type TEvent) that was triggered.
          */
-        void OnEvent(const TEvent& event) {
-            std::type_index event_type = event.get_type();
-            if (handlers.contains(event_type)) {
-                handlers[event_type]->HandleEvent(event);
+        void HandleEvent(const TEvent& event) {
+            for(auto& handler : handlers_) {
+               handler->HandleEvent(event);
             }
         }
 
     private:
-        std::unordered_map<std::type_index, std::unique_ptr<IEventHandler>> handlers;
+        std::unordered_set<std::unique_ptr<IEventHandler>> handlers_;
     };
 
 
