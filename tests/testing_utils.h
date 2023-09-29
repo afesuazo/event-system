@@ -10,43 +10,42 @@
 
 namespace event_system {
 
+    enum class GeneralEvents {
+        GeneralSubType0,
+        GeneralSubType1,
+    };
+
+    enum class SpecificEvents {
+        SpecificSubType0,
+        SpecificSubType1,
+    };
+
     class GeneralEvent : public BaseEvent {
     public:
-        enum class SubType {
-            GeneralSubType0,
-            GeneralSubType1,
-        };
-
-        explicit GeneralEvent(SubType sub_type) : sub_type_(sub_type) {
-            event_name = "GeneralEvent";
+        explicit GeneralEvent(GeneralEvents sub_type) : sub_type_(sub_type) {
+            event_name_ = "GeneralEvent";
         }
 
-        [[nodiscard]] int get_sub_type() const override {
-            return static_cast<int>(sub_type_);
+        [[nodiscard]] GeneralEvents get_sub_type() const {
+            return sub_type_;
         }
-
 
     private:
-        SubType sub_type_;
+        GeneralEvents sub_type_;
     };
 
     class SpecificEvent : public BaseEvent {
     public:
-        enum class SubType {
-            SpecificSubType0,
-            SpecificSubType1,
-        };
-
-        explicit SpecificEvent(SubType sub_type) : sub_type_(sub_type) {
-            event_name = "SpecificEvent";
+        explicit SpecificEvent(SpecificEvents sub_type) : sub_type_(sub_type) {
+            event_name_ = "SpecificEvent";
         }
 
-        [[nodiscard]] int get_sub_type() const override {
-            return static_cast<int>(sub_type_);
+        [[nodiscard]] SpecificEvents get_sub_type() const {
+            return sub_type_;
         }
 
     private:
-        SubType sub_type_;
+        SpecificEvents sub_type_;
     };
 
     template<typename TEvent>
@@ -56,7 +55,7 @@ namespace event_system {
 
         void OnEvent(const TEvent& event, bool is_test) {
             event_triggered = true;
-            std::cout << "Received event: " << event.get_sub_type() << std::endl;
+            std::cout << "Received event: " << std::endl;
         }
     };
 
@@ -67,8 +66,8 @@ namespace event_system {
         void EmitEvent(const TEvent &event, bool is_test) {
 
             // Without this check, an empty vector would be created, and we would loop over an empty container
-            auto it = get_event_map_iterator(typeid(event));
-            if (it == subscribers.end()) { return; }
+            auto it = subscribers_.find(typeid(event));
+            if (it == subscribers_.end()) { return; }
 
             // Iterate through the collection of weak_pointers
             // If we can lock the pointer, call the OnEvent method on the listener

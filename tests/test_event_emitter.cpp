@@ -35,7 +35,7 @@ TEST_F(EventEmitterTest, ValidEventEmissionTest) {
     std::shared_ptr<EventListener<GeneralEvent>> general_event_listener = std::make_shared<TestEventListener<GeneralEvent>>();
     event_manager->AddSubscriber(general_event_listener);
 
-    GeneralEvent general_event{GeneralEvent::SubType::GeneralSubType0};
+    GeneralEvent general_event{GeneralEvents::GeneralSubType0};
     event_emitter.Emit(general_event, true);
 
     auto casted_listener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
@@ -46,7 +46,7 @@ TEST_F(EventEmitterTest, InvalidEventEmissionTest) {
     std::shared_ptr<EventListener<GeneralEvent>> general_event_listener = std::make_shared<TestEventListener<GeneralEvent>>();
     event_manager->AddSubscriber(general_event_listener);
 
-    GeneralEvent general_event{GeneralEvent::SubType::GeneralSubType0};
+    GeneralEvent general_event{GeneralEvents::GeneralSubType0};
     SpecificOnlyEventEmitter specific_event_emitter{event_manager};
 
     specific_event_emitter.Emit(general_event);

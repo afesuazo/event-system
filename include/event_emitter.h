@@ -22,9 +22,9 @@ namespace event_system {
         EventEmitter() = default;
 
         explicit EventEmitter(const std::shared_ptr<EventManager>& manager) :
-                event_manager(manager) {}
+                event_manager_(manager) {}
 
-        virtual ~EventEmitter() = default;
+        ~EventEmitter() = default;
 
         /**
          * @brief Emit an event on the registered event manager.
@@ -41,13 +41,13 @@ namespace event_system {
                 return;
             }
 
-            if (auto shared_manager = event_manager.lock()) {
+            if (auto shared_manager = event_manager_.lock()) {
                 shared_manager->EmitEvent(event);
             }
         }
 
         std::shared_ptr<EventManager> get_event_manager() {
-            return event_manager.lock();
+            return event_manager_.lock();
         }
 
     protected:
@@ -63,7 +63,7 @@ namespace event_system {
         }
 
     private:
-        std::weak_ptr<EventManager> event_manager;
+        std::weak_ptr<EventManager> event_manager_;
     };
 
 }

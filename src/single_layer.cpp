@@ -5,48 +5,46 @@
 #include "event_layer.h"
 #include "event_listener.h"
 #include "base_event.h"
-#include "event_emitter.h"
 #include <string>
 
 using namespace event_system;
 
+enum class GeneralEvents {
+    GeneralSubType0,
+    GeneralSubType1,
+};
+
+enum class SpecificEvents {
+    SpecificSubType0,
+    SpecificSubType1,
+};
+
 class GeneralEvent : public BaseEvent {
 public:
-    enum class SubType {
-        GeneralSubType0,
-        GeneralSubType1,
-    };
-
-    explicit GeneralEvent(SubType sub_type) : sub_type_(sub_type) {
-        event_name = "GeneralEvent";
+    explicit GeneralEvent(GeneralEvents sub_type) : sub_type_(sub_type) {
+        event_name_ = "GeneralEvent";
     }
 
-    [[nodiscard]] int get_sub_type() const override {
-        return static_cast<int>(sub_type_);
+    [[nodiscard]] GeneralEvents get_sub_type() const {
+        return sub_type_;
     }
-
 
 private:
-    SubType sub_type_;
+    GeneralEvents sub_type_;
 };
 
 class SpecificEvent : public BaseEvent {
 public:
-    enum class SubType {
-        SpecificSubType0,
-        SpecificSubType1,
-    };
-
-    explicit SpecificEvent(SubType sub_type) : sub_type_(sub_type) {
-        event_name = "SpecificEvent";
+    explicit SpecificEvent(SpecificEvents sub_type) : sub_type_(sub_type) {
+        event_name_ = "SpecificEvent";
     }
 
-    [[nodiscard]] int get_sub_type() const override {
-        return static_cast<int>(sub_type_);
+    [[nodiscard]] SpecificEvents get_sub_type() const {
+        return sub_type_;
     }
 
 private:
-    SubType sub_type_;
+    SpecificEvents sub_type_;
 };
 
 class SampleLayer1 : public EventLayer {
@@ -56,10 +54,10 @@ public:
         std::shared_ptr<EventListener<GeneralEvent>>
                 general_listener_1 = std::make_shared<EventListener<GeneralEvent>>();
 
-        AddListener(general_listener_1);
+        AddEventListener(general_listener_1);
 
-        GeneralEvent general_event_1{GeneralEvent::SubType::GeneralSubType1};
-        SpecificEvent specific_event_0{SpecificEvent::SubType::SpecificSubType0};
+        GeneralEvent general_event_1{GeneralEvents::GeneralSubType1};
+        SpecificEvent specific_event_0{SpecificEvents::SpecificSubType0};
 
         TriggerEvent(specific_event_0); // Should not emit an event
         TriggerEvent(general_event_1);
