@@ -25,6 +25,7 @@ TEST_F(EventHandlerTest, DerivedOnEventTriggeredTest) {
     EXPECT_TRUE(casted_event_handler->event_triggered);
 }
 
+// Disabled for now as I opted to use a static cast in the event handler class
 TEST_F(EventHandlerTest, DISABLED_ProperEventTypeTest) {
     SpecificEvent specificEvent{SpecificEvents::SpecificSubType0};
     general_event_handler->OnEvent(specificEvent);

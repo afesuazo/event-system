@@ -5,14 +5,14 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include "event_layer.h"
-#include "event_manager.h"
+#include "event_handler.h"
 #include "testing_utils.h"
 #include <thread>
 #include <chrono>
 
 using namespace event_system;
 
-class AddListenerLayer : public EventLayer {
+class AddEventLayer : public EventLayer {
 public:
 
     using EventLayer :: EventLayer;
@@ -20,14 +20,14 @@ public:
     void Run() override {
         std::cout << "Sample layer running\n";
 
-        std::shared_ptr<EventListener<GeneralEvent>>
-                general_listener = std::make_shared<EventListener<GeneralEvent>>();
+        std::shared_ptr<IEventHandler<GeneralEvent>>
+                general_handler = std::make_shared<TestEventHandler<GeneralEvent>>();
 
-        AddEventListener(general_listener);
+        AddEventHandler(general_handler);
     }
 };
 
-class RemoveListenerLayer : public EventLayer {
+class RemoveEventLayer : public EventLayer {
 public:
 
     using EventLayer :: EventLayer;
@@ -35,37 +35,37 @@ public:
     void Run() override {
         std::cout << "Sample layer running\n";
 
-        std::shared_ptr<EventListener<GeneralEvent>>
-                general_listener = std::make_shared<EventListener<GeneralEvent>>();
+        std::shared_ptr<IEventHandler<GeneralEvent>>
+                general_handler = std::make_shared<TestEventHandler<GeneralEvent>>();
 
-        AddEventListener(general_listener);
-        RemoveEventListener(general_listener);
+        AddEventHandler(general_handler);
+        RemoveEventHandler(general_handler);
     }
 };
 
-TEST(EventLayerTest, AddedListenerTest) {
-    AddListenerLayer event_layer{};
+TEST(EventLayerTest, AddedHandlerTest) {
+    AddEventLayer event_layer{};
 
     // Start Run in a separate thread
     std::thread run_thread(&EventLayer::Run, &event_layer);
-    // Give time to set listeners
+    // Give time to set handlers
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    EXPECT_EQ(event_layer.get_listener_count(), 1);
+    EXPECT_EQ(event_layer.get_handler_count(), 1);
 
     event_layer.Stop();
     run_thread.join();
 }
 
-TEST(EventLayerTest, RemovedListenerTest) {
-    RemoveListenerLayer event_layer{};
+TEST(EventLayerTest, RemovedHandlerTest) {
+    RemoveEventLayer event_layer{};
 
     // Start Run in a separate thread
     std::thread run_thread(&EventLayer::Run, &event_layer);
-    // Give time to set listeners
+    // Give time to set handlers
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    EXPECT_EQ(event_layer.get_listener_count(), 0);
+    EXPECT_EQ(event_layer.get_handler_count(), 0);
 
     event_layer.Stop();
     run_thread.join();

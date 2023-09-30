@@ -7,6 +7,7 @@
 #include "event_manager.h"
 #include "event_emitter.h"
 #include "testing_utils.h"
+#include "event_handler.h"
 
 using namespace event_system;
 
@@ -23,34 +24,34 @@ protected:
 class EventEmitterTest : public ::testing::Test {
 protected:
     std::shared_ptr<EventManager> event_manager;
-    TestEventEmitter event_emitter;
+    EventEmitter event_emitter;
 
     void SetUp() override {
-        event_manager = std::make_shared<TestEventManager>();
-        event_emitter = TestEventEmitter{event_manager};
+        event_manager = std::make_shared<EventManager>();
+        event_emitter = EventEmitter{event_manager};
     }
 };
 
 TEST_F(EventEmitterTest, ValidEventEmissionTest) {
-    std::shared_ptr<EventListener<GeneralEvent>> general_event_listener = std::make_shared<TestEventListener<GeneralEvent>>();
-    event_manager->AddSubscriber(general_event_listener);
+    std::shared_ptr<IEventHandler<GeneralEvent>> general_event_handler = std::make_shared<TestEventHandler<GeneralEvent>>();
+    event_manager->AddSubscriber(general_event_handler);
 
     GeneralEvent general_event{GeneralEvents::GeneralSubType0};
-    event_emitter.Emit(general_event, true);
+    event_emitter.Emit(general_event);
 
-    auto casted_listener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
-    EXPECT_TRUE(casted_listener->event_triggered);
+    auto casted_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
+    EXPECT_TRUE(casted_handler->event_triggered);
 }
 
 TEST_F(EventEmitterTest, InvalidEventEmissionTest) {
-    std::shared_ptr<EventListener<GeneralEvent>> general_event_listener = std::make_shared<TestEventListener<GeneralEvent>>();
-    event_manager->AddSubscriber(general_event_listener);
+    std::shared_ptr<IEventHandler<GeneralEvent>> general_event_handler = std::make_shared<TestEventHandler<GeneralEvent>>();
+    event_manager->AddSubscriber(general_event_handler);
 
     GeneralEvent general_event{GeneralEvents::GeneralSubType0};
     SpecificOnlyEventEmitter specific_event_emitter{event_manager};
 
     specific_event_emitter.Emit(general_event);
 
-    auto casted_listener = std::static_pointer_cast<TestEventListener<GeneralEvent>>(general_event_listener);
-    EXPECT_FALSE(casted_listener->event_triggered);
+    auto casted_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
+    EXPECT_FALSE(casted_handler->event_triggered);
 }
