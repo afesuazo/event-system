@@ -5,12 +5,12 @@
 #define ENABLE_SAFETY_CHECKS
 
 #pragma once
-#include "event_listener.h"
 #include <unordered_map>
 #include "algorithm"
 #include <typeindex>
 #include <memory>
 #include <iostream>
+#include "event_handler.h"
 
 namespace event_system {
 
@@ -24,44 +24,44 @@ namespace event_system {
     class EventManager {
     public:
         // Using weak_ptr to be able to confirm the existence of the object before use
-        using EventSubscriberMap = std::unordered_map<std::type_index, std::vector<std::weak_ptr<IEventListener>>>;
+        using EventSubscriberMap = std::unordered_map<std::type_index, std::vector<std::weak_ptr<IEventHandlerBase>>>;
 
         EventManager() = default;
         ~EventManager() = default;
 
         /**
-         * @brief Add a listener to the event subscriber list.
+         * @brief Add a event_handler to the event subscriber list.
          *
          * @tparam TEvent The type of the event to subscribe to.
-         * @param listener Pointer to the listener object subscribing to the event.
+         * @param event_handler Pointer to the event_handler object subscribing to the event.
          *
-         * Adds a listener to the subscriber list tied to the event type. If the event type has not been
-         * previously registered, it will be registered with the given listener as its only subscriber.
+         * Adds an event_handler to the subscriber list tied to the event type. If the event type has not been
+         * previously registered, it will be registered with the given event_handler as its only subscriber.
          */
         template<typename TEvent>
-        void AddSubscriber(const std::shared_ptr<EventListener<TEvent>>& listener) {
+        void AddSubscriber(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
 
 #ifdef ENABLE_SAFETY_CHECKS
-            if (!SubscriptionExists(listener)) {
+            if (!SubscriptionExists(event_handler)) {
 #endif
                 // Adding a new key creates a default initialized vector
-                subscribers_[typeid(TEvent)].push_back(listener);
+                subscribers_[typeid(TEvent)].push_back(event_handler);
 #ifdef ENABLE_SAFETY_CHECKS
             }
 #endif
         }
 
         /**
-         * @brief Removes a listener from an events subscriber list.
+         * @brief Removes a event_handler from an events subscriber list.
          *
          * @tparam TEvent The type of the event to unsubscribe from.
-         * @param listener Pointer to the listener object unsubscribing from the event.
+         * @param event_handler Pointer to the IEventHandler object unsubscribing from the event.
          *
-         * Removes a listener from the subscriber list tied to the event type. If there are no subscribers_ left
-         * after removing the listener, the event will be removed from the map
+         * Removes a event_handler from the subscriber list tied to the event type. If there are no subscribers_ left
+         * after removing the event_handler, the event will be removed from the map
          */
         template<typename TEvent>
-        void RemoveSubscriber(const std::shared_ptr<EventListener<TEvent>>& listener) {
+        void RemoveSubscriber(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
 
             // Check if key exists to avoid creating an empty vector
             auto it = subscribers_.find(typeid(TEvent));
@@ -69,11 +69,11 @@ namespace event_system {
             if (it == subscribers_.end()) { return; }
 
             auto &listeners = it->second;
-            it->second.erase(std::remove_if(listeners.begin(), listeners.end(), [&listener](
-                    const std::weak_ptr<IEventListener> &listener_weak_ptr) {
+            it->second.erase(std::remove_if(listeners.begin(), listeners.end(), [&event_handler](
+                    const std::weak_ptr<IEventHandlerBase> &listener_weak_ptr) {
                 auto shared_ptr = listener_weak_ptr.lock();
                 // Also check if pointer is still valid
-                return !shared_ptr || shared_ptr == listener;
+                return !shared_ptr || shared_ptr == event_handler;
             }), listeners.end());
 
 #ifdef ENABLE_SAFETY_CHECKS
@@ -125,7 +125,7 @@ namespace event_system {
          * @return True if there is a listener subscribed to the event type
          */
         template<typename TEvent>
-        bool SubscriptionExists(const std::shared_ptr<EventListener<TEvent>>& listener) const {
+        bool SubscriptionExists(const std::shared_ptr<IEventHandler<TEvent>>& listener) const {
 
             // get_event_map_iterator() not used to keep this as const method
             auto it = subscribers_.find(typeid(TEvent));
@@ -136,7 +136,7 @@ namespace event_system {
             return std::any_of(
                     listeners.begin(),
                     listeners.end(),
-                    [&listener](const std::weak_ptr<IEventListener> &listener_weak_ptr) {
+                    [&listener](const std::weak_ptr<IEventHandlerBase> &listener_weak_ptr) {
                         return listener_weak_ptr.lock() == listener;
                     });
         }

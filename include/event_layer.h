@@ -5,13 +5,13 @@
 #pragma once
 
 #include "base_event.h"
-#include "event_listener.h"
 #include "event_manager.h"
 #include "event_emitter.h"
 #include <memory>
 #include <string>
 #include <mutex>
 #include <atomic>
+#include "event_handler.h"
 
 namespace event_system {
 
@@ -87,7 +87,7 @@ namespace event_system {
          * @param listener A reference to the listener object to add.
          */
         template<typename TEvent>
-        void AddEventListener(const std::shared_ptr<EventListener<TEvent>>& listener) {
+        void AddEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& listener) {
             event_manager_->AddSubscriber(listener);
         }
 
@@ -97,7 +97,7 @@ namespace event_system {
          * @param listener A reference to the listener object to remove.
          */
         template<typename TEvent>
-        void RemoveEventListener(const std::shared_ptr<EventListener<TEvent>>& listener) {
+        void RemoveEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& listener) {
             event_manager_->RemoveSubscriber(listener);
         }
 
@@ -123,7 +123,8 @@ namespace event_system {
          *
          * @param event The event to emit.
          */
-        void TriggerEvent(const BaseEvent& event) {
+        template <typename TEvent>
+        void TriggerEvent(const TEvent& event) {
             event_emitter_.Emit(event);
         }
 
