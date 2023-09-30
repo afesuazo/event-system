@@ -41,7 +41,8 @@ namespace event_system {
          * @param event The event that was triggered.
          */
         void OnEvent(const BaseEvent& event) override {
-            // This function acts as the controlled, type-safe wrapper.
+            // This function acts as the controlled, type-safe wrapper
+            // Will cause undefined behavior if event is not of type TEvent
             HandleEvent(static_cast<const TEvent&>(event));
         }
     protected:

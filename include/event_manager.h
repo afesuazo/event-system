@@ -17,7 +17,7 @@ namespace event_system {
     /**
     * @brief Provides a method of communication between independent components
     *
-    * Provides an object to which EventListeners can subscribe to. When needed, the EventManager
+    * Provides an object to which EventHandlers can subscribe to. When needed, the EventManager
     * can trigger an event which will get relayed to all objects subscribed to said event. This class
     * allows easy communication between independent components in a program
     */
@@ -68,17 +68,17 @@ namespace event_system {
             // No key found, nothing to remove
             if (it == subscribers_.end()) { return; }
 
-            auto &listeners = it->second;
-            it->second.erase(std::remove_if(listeners.begin(), listeners.end(), [&event_handler](
-                    const std::weak_ptr<IEventHandlerBase> &listener_weak_ptr) {
-                auto shared_ptr = listener_weak_ptr.lock();
+            auto &handlers = it->second;
+            it->second.erase(std::remove_if(handlers.begin(), handlers.end(), [&event_handler](
+                    const std::weak_ptr<IEventHandlerBase> &handler_weak_ptr) {
+                auto shared_ptr = handler_weak_ptr.lock();
                 // Also check if pointer is still valid
                 return !shared_ptr || shared_ptr == event_handler;
-            }), listeners.end());
+            }), handlers.end());
 
 #ifdef ENABLE_SAFETY_CHECKS
             // Make sure we don't leave unused keys and empty vectors
-            if (listeners.empty()) {
+            if (handlers.empty()) {
                 subscribers_.erase(it);
             }
 #endif
@@ -100,44 +100,44 @@ namespace event_system {
             if (it == subscribers_.end()) { return; }
 
             // Iterate through the collection of weak_pointers
-            // If we can lock the pointer, call the OnEvent method on the listener
+            // If we can lock the pointer, call the OnEvent method on the handler
             // If we can't lock the pointer,
 
-            auto& listeners = it->second;
-            for (auto weak_ptr_it = listeners.begin(); weak_ptr_it != listeners.end();) {
+            auto& handlers = it->second;
+            for (auto weak_ptr_it = handlers.begin(); weak_ptr_it != handlers.end();) {
                 // Check if pointer is valid
-                if (auto listener = weak_ptr_it->lock()) {
-                    listener->OnEvent(event);
+                if (auto handler = weak_ptr_it->lock()) {
+                    handler->OnEvent(event);
                     ++weak_ptr_it;
                 } else {
                     // Object no longer exists and should be removed from map
-                    weak_ptr_it = listeners.erase(weak_ptr_it); // Return an iterator to the next weak ptr if any
+                    weak_ptr_it = handlers.erase(weak_ptr_it); // Return an iterator to the next weak ptr if any
                 }
             }
 
         }
 
         /**
-         * @brief Checks if an event-listener subscription exists.
+         * @brief Checks if an event-handler subscription exists.
          *
          * @tparam TEvent The type of the event to check.
-         * @param listener Pointer to listener object in question.
-         * @return True if there is a listener subscribed to the event type
+         * @param handler Pointer to handler object in question.
+         * @return True if there is a handler subscribed to the event type
          */
         template<typename TEvent>
-        bool SubscriptionExists(const std::shared_ptr<IEventHandler<TEvent>>& listener) const {
+        bool SubscriptionExists(const std::shared_ptr<IEventHandler<TEvent>>& handler) const {
 
             // get_event_map_iterator() not used to keep this as const method
             auto it = subscribers_.find(typeid(TEvent));
             if (it == subscribers_.end()) { return false; }
 
-            auto &listeners = it->second;
+            auto &handlers = it->second;
             // Using lambda for comparison between weak_ptr and shared_ptr
             return std::any_of(
-                    listeners.begin(),
-                    listeners.end(),
-                    [&listener](const std::weak_ptr<IEventHandlerBase> &listener_weak_ptr) {
-                        return listener_weak_ptr.lock() == listener;
+                    handlers.begin(),
+                    handlers.end(),
+                    [&handler](const std::weak_ptr<IEventHandlerBase> &handler_weak_ptr) {
+                        return handler_weak_ptr.lock() == handler;
                     });
         }
 

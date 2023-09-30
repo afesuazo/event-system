@@ -53,7 +53,7 @@ namespace event_system {
          * @brief Propagate and event to this layer
          *
          * This method can be called by external sources to emit an event inside this layer. The local manager is
-         * given the event in order to trigger all appropriate local listeners.
+         * given the event in order to trigger all appropriate local handlers.
          *
          * @param event The event to emit.
          */
@@ -71,34 +71,34 @@ namespace event_system {
         }
 
         /**
-         * @brief Get the total amount of active listeners in the layer
+         * @brief Get the total amount of active handlers in the layer
          *
-         * @returns size_t representing the total active listeners
+         * @returns size_t representing the total active handlers
          */
-        size_t get_listener_count() const {
+        size_t get_handler_count() const {
             return event_manager_->get_subscriber_count();
         }
 
     protected:
 
         /**
-         * @brief Adds a listener to the local event manager
+         * @brief Adds a handler to the local event manager
          *
-         * @param listener A reference to the listener object to add.
+         * @param handler A reference to the handler object to add.
          */
         template<typename TEvent>
-        void AddEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& listener) {
-            event_manager_->AddSubscriber(listener);
+        void AddEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& handler) {
+            event_manager_->AddSubscriber(handler);
         }
 
         /**
-         * @brief Removes a listener from the local event manager
+         * @brief Removes a handler from the local event manager
          *
-         * @param listener A reference to the listener object to remove.
+         * @param handler A reference to the handler object to remove.
          */
         template<typename TEvent>
-        void RemoveEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& listener) {
-            event_manager_->RemoveSubscriber(listener);
+        void RemoveEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& handler) {
+            event_manager_->RemoveSubscriber(handler);
         }
 
         // TODO: Default to all or none?
