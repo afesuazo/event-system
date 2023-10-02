@@ -22,20 +22,14 @@ namespace event_system {
 
         EventEmitter() = default;
 
-        explicit EventEmitter(const std::shared_ptr<EventManager>& manager)
-                : event_manager_(manager) {}
-
-        explicit EventEmitter(const std::shared_ptr<IEventHandler<BaseEvent>>& external_handler)
-                : external_event_handler_(external_handler) {}
-
         EventEmitter(const std::shared_ptr<EventManager>& manager,
-                     const std::shared_ptr<IEventHandler<BaseEvent>>& external_handler)
-                : event_manager_(manager), external_event_handler_(external_handler) {}
+                     const std::shared_ptr<EventManager>& external_manager_)
+                : event_manager_(manager), external_event_manager_(external_manager_) {}
 
         ~EventEmitter() = default;
 
         /**
-         * @brief Emit an event on the registered event manager and parent application handler.
+         * @brief Emit an event on the registered event manager and parent application manager.
          *
          * This method first checks if the event is allowed by calling the IsAllowedEvent method before
          * relaying it to the event manager.
@@ -50,12 +44,12 @@ namespace event_system {
             }
 
             auto shared_manager = event_manager_.lock();
-            auto shared_external_handler = external_event_handler_.lock();
+            auto shared_external_manager = external_event_manager_.lock();
 
             // Layer with no event manager can still emit
-            // Layer with no external handler can be used if events don't need to propagate
+            // Layer with no external event manager can be used if events don't need to propagate
             // If both are missing, emitter does nothing
-            if (!shared_manager && !shared_external_handler) {
+            if (!shared_manager && !shared_external_manager) {
                 std::cerr << "Both EventManager and External Event Handler are not available or unset.\n";
                 return;
             }
@@ -69,21 +63,21 @@ namespace event_system {
             }
 
             // Send event to parent application
-            if (shared_external_handler) {
+            if (shared_external_manager) {
                 try {
-                    shared_external_handler->OnEvent(event);
+                    shared_external_manager->EmitEvent(event);
                 } catch (const std::exception& e) {
                     std::cerr << "Exception caught when emitting event to External Event Handler: " << e.what() << '\n';
                 }
             }
         }
 
-        void SetEventManager(const std::shared_ptr<EventManager>& manager) {
+        void set_event_manager(const std::shared_ptr<EventManager>& manager) {
             event_manager_ = manager;
         }
 
-        void SetCentralHandler(const std::shared_ptr<IEventHandler<BaseEvent>>& external_handler) {
-            external_event_handler_ = external_handler;
+        void set_external_manager(const std::shared_ptr<EventManager>& external_manager_) {
+            external_event_manager_ = external_manager_;
         }
 
     protected:
@@ -100,7 +94,7 @@ namespace event_system {
 
     private:
         std::weak_ptr<EventManager> event_manager_;
-        std::weak_ptr<IEventHandler<BaseEvent>> external_event_handler_;  // Central event handler
+        std::weak_ptr<EventManager> external_event_manager_;  // Parent application manager
     };
 
 }
