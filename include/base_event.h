@@ -17,6 +17,10 @@ namespace event_system {
      */
     class BaseEvent {
     public:
+        using LayerID = std::string;
+
+        explicit BaseEvent(LayerID layer_id = "")
+                : layer_id_(layer_id) {}
 
         virtual ~BaseEvent() = default;
 
@@ -27,8 +31,15 @@ namespace event_system {
         [[nodiscard]] std::string get_name() const {
             return event_name_;
         };
+
+        [[nodiscard]] LayerID get_sender_id() const {
+            return layer_id_;
+        }
+
     protected:
         std::string event_name_ = get_type().name();
+        LayerID layer_id_;  // ID of the layer that generated the event
+
     };
 
 
