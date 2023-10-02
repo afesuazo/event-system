@@ -55,9 +55,6 @@ namespace event_system {
     private:
         void HandleEvent(const TEvent& event) override {
             event_triggered = true;
-            std::cout << "Handling Event: " << typeid(event).name() << "\n";
-            std::cout << "Handling Event: " << typeid(TEvent).name() << "\n";
-            std::cout << "General event handled\n";
         }
     };
 

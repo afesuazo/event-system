@@ -14,7 +14,8 @@ namespace event_system {
      * @brief Helper class used to emit events in an event manager object.
      *
      * The EventEmitter serves as a middleman class when emitting events. It add a mechanism for checking and
-     * filtering event types that should not or are not allowed to be emitted.
+     * filtering event types that should not or are not allowed to be emitted. It also separates the logic of
+     * emitting event locally within a layer vs letting the event reach other layers
      */
     class EventEmitter {
     public:

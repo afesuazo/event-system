@@ -3,7 +3,7 @@
 //
 
 #include "event_layer.h"
-#include "event_listener.h"
+#include "event_handler.h"
 #include "base_event.h"
 #include <string>
 
@@ -47,14 +47,20 @@ private:
     SpecificEvents sub_type_;
 };
 
-class SampleLayer1 : public EventLayer {
+class GeneralEventHandler : public IEventHandler<GeneralEvent> {
+    void HandleEvent(const GeneralEvent& event) override {
+        std::cout << "General event handled\n";
+    }
+};
+
+class SampleLayer : public EventLayer {
 public:
 
     void Run() override {
-        std::shared_ptr<EventListener<GeneralEvent>>
-                general_listener_1 = std::make_shared<EventListener<GeneralEvent>>();
+        std::shared_ptr<IEventHandler<GeneralEvent>>
+                general_handler_1 = std::make_shared<GeneralEventHandler>();
 
-        AddEventListener(general_listener_1);
+        AddEventHandler(general_handler_1);
 
         GeneralEvent general_event_1{GeneralEvents::GeneralSubType1};
         SpecificEvent specific_event_0{SpecificEvents::SpecificSubType0};
@@ -70,10 +76,8 @@ int main() {
     std::cout << "** Single Layer Event System Example **\n\n";
 
     // Set application layers
-    SampleLayer1 sample_layer_1{};
-
-    // Add listeners to each layer
-    sample_layer_1.Run();
+    SampleLayer sample_layer{};
+    sample_layer.Run();
 
     return 0;
 }

@@ -30,12 +30,12 @@ namespace event_system {
         ~EventManager() = default;
 
         /**
-         * @brief Add a event_handler to the event subscriber list.
+         * @brief Add a IEventHandler to the event subscriber list.
          *
          * @tparam TEvent The type of the event to subscribe to.
-         * @param event_handler Pointer to the event_handler object subscribing to the event.
+         * @param event_handler Pointer to the IEventHandler object subscribing to the event.
          *
-         * Adds an event_handler to the subscriber list tied to the event type. If the event type has not been
+         * Adds a IEventHandler to the subscriber list tied to the event type. If the event type has not been
          * previously registered, it will be registered with the given event_handler as its only subscriber.
          */
         template<typename TEvent>
@@ -52,12 +52,12 @@ namespace event_system {
         }
 
         /**
-         * @brief Removes a event_handler from an events subscriber list.
+         * @brief Removes a IEventHandler from an events subscriber list.
          *
          * @tparam TEvent The type of the event to unsubscribe from.
          * @param event_handler Pointer to the IEventHandler object unsubscribing from the event.
          *
-         * Removes a event_handler from the subscriber list tied to the event type. If there are no subscribers_ left
+         * Removes a IEventHandler from the subscriber list tied to the event type. If there are no subscribers_ left
          * after removing the event_handler, the event will be removed from the map
          */
         template<typename TEvent>
@@ -101,8 +101,6 @@ namespace event_system {
 
             // Iterate through the collection of weak_pointers
             // If we can lock the pointer, call the OnEvent method on the handler
-            // If we can't lock the pointer,
-
             auto& handlers = it->second;
             for (auto weak_ptr_it = handlers.begin(); weak_ptr_it != handlers.end();) {
                 // Check if pointer is valid
@@ -118,7 +116,7 @@ namespace event_system {
         }
 
         /**
-         * @brief Checks if an event-handler subscription exists.
+         * @brief Checks if an IEventHandler subscription exists.
          *
          * @tparam TEvent The type of the event to check.
          * @param handler Pointer to handler object in question.
