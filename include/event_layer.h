@@ -24,9 +24,9 @@ namespace event_system {
      */
     class EventLayer {
     public:
-        EventLayer() {
+        explicit EventLayer(const std::shared_ptr<EventManager>& external_manager_ = nullptr) {
             event_manager_ = std::make_shared<EventManager>();
-            event_emitter_ = EventEmitter{event_manager_};
+            event_emitter_ = EventEmitter{event_manager_, external_manager_};
         }
 
         virtual ~EventLayer() = default;
