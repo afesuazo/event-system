@@ -36,7 +36,7 @@ namespace event_system {
          * @brief Overridden method to handle type-erasure. Will immediately try to call the HandleEvent method.
          *
          * Statically casts the event reference to the expected event type (TEvent). If types match,
-         * a virtual OnEvent function with the same signature gets called.
+         * a virtual HandleEvent function for that event type is called.
          *
          * @param event The event that was triggered.
          */

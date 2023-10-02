@@ -59,7 +59,6 @@ namespace event_system {
          */
         // For events sourced from external layers
         void OnEvent(const BaseEvent& event) {
-            std::cout << "here";
             event_manager_->EmitEvent(event);
         }
 
