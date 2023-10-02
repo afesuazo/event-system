@@ -58,7 +58,7 @@ namespace event_system {
          * @param event The event to emit.
          */
         // For events sourced from external layers
-        void OnEvent(const BaseEvent& event) {
+        void OnExternalEvent(const BaseEvent& event) {
             event_manager_->EmitEvent(event);
         }
 

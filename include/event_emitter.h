@@ -22,13 +22,17 @@ namespace event_system {
 
         EventEmitter() = default;
 
+        EventEmitter(const std::shared_ptr<EventManager>& manager,
+                     const std::shared_ptr<IEventHandler<BaseEvent>>& central_handler)
+                : event_manager_(manager), parent_application_event_handler_(central_handler) {}
+
         explicit EventEmitter(const std::shared_ptr<EventManager>& manager) :
                 event_manager_(manager) {}
 
         ~EventEmitter() = default;
 
         /**
-         * @brief Emit an event on the registered event manager.
+         * @brief Emit an event on the registered event manager and parent application handler.
          *
          * This method first checks if the event is allowed by calling the IsAllowedEvent method before
          * relaying it to the event manager.
@@ -44,6 +48,11 @@ namespace event_system {
 
             if (auto shared_manager = event_manager_.lock()) {
                 shared_manager->EmitEvent(event);
+            }
+
+            // Send event to parent application
+            if (auto shared_central_handler = parent_application_event_handler_.lock()) {
+                shared_central_handler->OnEvent(event);
             }
         }
 
@@ -65,6 +74,7 @@ namespace event_system {
 
     private:
         std::weak_ptr<EventManager> event_manager_;
+        std::weak_ptr<IEventHandler<BaseEvent>> parent_application_event_handler_;  // Central event handler
     };
 
 }
