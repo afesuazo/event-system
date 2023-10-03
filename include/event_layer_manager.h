@@ -5,6 +5,7 @@
 #pragma once
 #include "base_event.h"
 #include "event_layer.h"
+#include <functional>
 
 namespace event_system {
 
@@ -13,7 +14,11 @@ namespace event_system {
         EventLayerManager() = default;
         ~EventLayerManager() = default;
 
-        void RegisterLayer(std::shared_ptr<EventLayer> layer) {
+        void RegisterLayer(std::shared_ptr<EventLayer>& layer) {
+            auto callback = [this](const auto& event, const std::string& sender_id) {
+                this->OnEvent(event, sender_id);
+            };
+            layer->set_layer_manager_callback(callback);
             layers_.push_back(layer);
         }
 

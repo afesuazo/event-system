@@ -158,7 +158,6 @@ namespace event_system {
     protected:
         //TODO: Compare performance to list
         EventHandlerMap subscribers_;
-
     };
 
 }

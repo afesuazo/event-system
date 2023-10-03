@@ -5,7 +5,6 @@
 #pragma once
 #include "base_event.h"
 #include "event_manager.h"
-#include "event_emitter.h"
 
 namespace event_system {
 

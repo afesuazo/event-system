@@ -5,8 +5,11 @@
 #pragma once
 #include <typeindex>
 #include <string>
+#include <utility>
 
 namespace event_system {
+
+    using LayerId = std::string;
 
     /**
      * @class BaseEvent
@@ -17,10 +20,9 @@ namespace event_system {
      */
     class BaseEvent {
     public:
-        using LayerID = std::string;
 
-        explicit BaseEvent(LayerID layer_id = "")
-                : layer_id_(layer_id) {}
+        explicit BaseEvent(LayerId layer_id = "")
+                : layer_id_(std::move(layer_id)) {}
 
         virtual ~BaseEvent() = default;
 
@@ -32,13 +34,13 @@ namespace event_system {
             return event_name_;
         };
 
-        [[nodiscard]] LayerID get_sender_id() const {
+        [[nodiscard]] LayerId get_sender_id() const {
             return layer_id_;
         }
 
     protected:
         std::string event_name_ = get_type().name();
-        LayerID layer_id_;  // ID of the layer that generated the event
+        LayerId layer_id_;  // ID of the layer that generated the event
 
     };
 
