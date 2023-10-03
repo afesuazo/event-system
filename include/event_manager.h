@@ -22,10 +22,12 @@ namespace event_system {
     * allows easy communication between independent components in a program
     */
     class EventManager {
-    public:
         // Using weak_ptr to be able to confirm the existence of the object before use
-        using EventHandlerMap = std::unordered_map<std::type_index, std::vector<std::weak_ptr<IEventHandlerBase>>>;
+        using HandlerSharedPtr = std::shared_ptr<IEventHandlerBase>;
+        using HandlerWeakPtr = std::weak_ptr<IEventHandlerBase>;
+        using EventHandlerMap = std::unordered_map<EventType, std::vector<HandlerWeakPtr>>;
 
+    public:
         EventManager() = default;
         ~EventManager() = default;
 
@@ -38,14 +40,12 @@ namespace event_system {
          * Adds a IEventHandler to the subscriber list tied to the event type. If the event type has not been
          * previously registered, it will be registered with the given event_handler as its only subscriber.
          */
-        template<typename TEvent>
-        void AddHandler(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
-
+        void AddHandler(const HandlerSharedPtr& event_handler) {
 #ifdef ENABLE_SAFETY_CHECKS
             if (!HandlerExists(event_handler)) {
 #endif
                 // Adding a new key creates a default initialized vector
-                subscribers_[typeid(TEvent)].push_back(event_handler);
+                subscribers_[event_handler->GetHandledEventType()].push_back(event_handler);
 #ifdef ENABLE_SAFETY_CHECKS
             }
 #endif
@@ -60,17 +60,15 @@ namespace event_system {
          * Removes a IEventHandler from the subscriber list tied to the event type. If there are no subscribers_ left
          * after removing the event_handler, the event will be removed from the map
          */
-        template<typename TEvent>
-        void RemoveHandler(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
-
+        void RemoveHandler(const HandlerSharedPtr& event_handler) {
             // Check if key exists to avoid creating an empty vector
-            auto it = subscribers_.find(typeid(TEvent));
+            auto it = subscribers_.find(event_handler->GetHandledEventType());
             // No key found, nothing to remove
             if (it == subscribers_.end()) { return; }
 
             auto &handlers = it->second;
             it->second.erase(std::remove_if(handlers.begin(), handlers.end(), [&event_handler](
-                    const std::weak_ptr<IEventHandlerBase> &handler_weak_ptr) {
+                    const HandlerWeakPtr &handler_weak_ptr) {
                 auto shared_ptr = handler_weak_ptr.lock();
                 // Also check if pointer is still valid
                 return !shared_ptr || shared_ptr == event_handler;
@@ -92,11 +90,10 @@ namespace event_system {
          *
          * Informs all subscribers_ for the given event type that the event has been triggered.
          */
-        template<typename TEvent>
-        void EmitEvent(const TEvent &event) {
+        void EmitEvent(const BaseEvent& event) {
 
             // Without this check, an empty vector would be created, and we would loop over an empty container
-            auto it = subscribers_.find(typeid(TEvent));
+            auto it = subscribers_.find(event.get_event_type());
             if (it == subscribers_.end()) { return; }
 
             // Iterate through the collection of weak_pointers
@@ -122,11 +119,10 @@ namespace event_system {
          * @param handler Pointer to handler object in question.
          * @return True if there is a handler subscribed to the event type
          */
-        template<typename TEvent>
-        bool HandlerExists(const std::shared_ptr<IEventHandler<TEvent>>& handler) const {
+        [[nodiscard]] bool HandlerExists(const HandlerSharedPtr& handler) const {
 
             // get_event_map_iterator() not used to keep this as const method
-            auto it = subscribers_.find(typeid(TEvent));
+            auto it = subscribers_.find(handler->GetHandledEventType());
             if (it == subscribers_.end()) { return false; }
 
             auto &handlers = it->second;
@@ -134,7 +130,7 @@ namespace event_system {
             return std::any_of(
                     handlers.begin(),
                     handlers.end(),
-                    [&handler](const std::weak_ptr<IEventHandlerBase> &handler_weak_ptr) {
+                    [&handler](const HandlerWeakPtr &handler_weak_ptr) {
                         return handler_weak_ptr.lock() == handler;
                     });
         }
@@ -147,9 +143,8 @@ namespace event_system {
             return count;
         }
 
-        template<typename TEvent>
-        [[nodiscard]] size_t get_handler_count() const {
-            auto it = subscribers_.find(typeid(TEvent));
+        [[nodiscard]] size_t get_handler_count(EventType event_type) const {
+            auto it = subscribers_.find(event_type);
             if (it == subscribers_.end()) { return 0; }
 
             return it->second.size();

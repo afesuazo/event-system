@@ -20,6 +20,8 @@ namespace event_system {
     public:
         virtual ~IEventHandlerBase() = default;
         virtual void OnEvent(const BaseEvent& event) = 0;
+        [[nodiscard]] virtual EventType GetHandledEventType() const = 0;
+
     };
 
     /**
@@ -45,6 +47,11 @@ namespace event_system {
             // Will cause undefined behavior if event is not of type TEvent
             HandleEvent(static_cast<const TEvent&>(event));
         }
+
+        [[nodiscard]] EventType GetHandledEventType() const override {
+            return TEvent::GetStaticType();
+        }
+
     protected:
         /**
          * @brief Called when an event this handler subscribed to is triggered
