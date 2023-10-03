@@ -56,7 +56,8 @@ namespace event_system {
          * @param event The event to emit.
          */
         // For events sourced from external layers
-        void OnExternalEvent(const BaseEvent& event) {
+        template<typename TEvent>
+        void OnExternalEvent(const TEvent& event) {
             event_manager_.EmitEvent(event);
         }
 

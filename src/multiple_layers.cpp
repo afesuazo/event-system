@@ -5,6 +5,7 @@
 #include <iostream>
 #include "event_layer.h"
 #include "event_handler.h"
+#include "event_layer_manager.h"
 #include "base_event.h"
 #include <thread>
 #include <utility>
@@ -32,7 +33,7 @@ private:
 
 class MGeneralEventHandler : public IEventHandler<MGeneralEvent> {
     void HandleEvent(const MGeneralEvent& event) override {
-        std::cout << "General event handled in layer: " << event.get_sender_id() << "\n";
+        std::cout << "General event handled from layer: " << event.get_sender_id() << "\n";
     }
 };
 
@@ -58,17 +59,22 @@ int main() {
 
     std::cout << "** Multiple Layer Event System Example **\n\n";
 
+    EventLayerManager layer_manager{};
+
     // Set application layers
-    MSampleLayer layer_1{"layer_1"};
-    MSampleLayer layer_2{"layer_2"};
+    std::shared_ptr<EventLayer> layer_1 = std::make_shared<MSampleLayer>("layer_1");
+    std::shared_ptr<EventLayer> layer_2 = std::make_shared<MSampleLayer>("layer_2");
+
+    layer_manager.RegisterLayer(layer_1);
+    layer_manager.RegisterLayer(layer_2);
 
     // Run each layer
-    std::thread run_layer_1(&EventLayer::Run, &layer_1);
-    std::thread run_layer_2(&EventLayer::Run, &layer_2);
+    std::thread run_layer_1(&EventLayer::Run, layer_1);
+    std::thread run_layer_2(&EventLayer::Run, layer_2);
 
     // Join all layer threads
-    layer_1.Stop();
-    layer_2.Stop();
+    layer_1->Stop();
+    layer_2->Stop();
     run_layer_1.join();
     run_layer_2.join();
 }
