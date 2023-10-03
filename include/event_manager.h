@@ -24,7 +24,7 @@ namespace event_system {
     class EventManager {
     public:
         // Using weak_ptr to be able to confirm the existence of the object before use
-        using EventSubscriberMap = std::unordered_map<std::type_index, std::vector<std::weak_ptr<IEventHandlerBase>>>;
+        using EventHandlerMap = std::unordered_map<std::type_index, std::vector<std::weak_ptr<IEventHandlerBase>>>;
 
         EventManager() = default;
         ~EventManager() = default;
@@ -39,10 +39,10 @@ namespace event_system {
          * previously registered, it will be registered with the given event_handler as its only subscriber.
          */
         template<typename TEvent>
-        void AddSubscriber(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
+        void AddHandler(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
 
 #ifdef ENABLE_SAFETY_CHECKS
-            if (!SubscriptionExists(event_handler)) {
+            if (!HandlerExists(event_handler)) {
 #endif
                 // Adding a new key creates a default initialized vector
                 subscribers_[typeid(TEvent)].push_back(event_handler);
@@ -61,7 +61,7 @@ namespace event_system {
          * after removing the event_handler, the event will be removed from the map
          */
         template<typename TEvent>
-        void RemoveSubscriber(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
+        void RemoveHandler(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
 
             // Check if key exists to avoid creating an empty vector
             auto it = subscribers_.find(typeid(TEvent));
@@ -123,7 +123,7 @@ namespace event_system {
          * @return True if there is a handler subscribed to the event type
          */
         template<typename TEvent>
-        bool SubscriptionExists(const std::shared_ptr<IEventHandler<TEvent>>& handler) const {
+        bool HandlerExists(const std::shared_ptr<IEventHandler<TEvent>>& handler) const {
 
             // get_event_map_iterator() not used to keep this as const method
             auto it = subscribers_.find(typeid(TEvent));
@@ -139,7 +139,7 @@ namespace event_system {
                     });
         }
 
-        [[nodiscard]] size_t get_subscriber_count() const {
+        [[nodiscard]] size_t get_handler_count() const {
             size_t count{0};
             for (const auto& event_type : subscribers_) {
                 count += event_type.second.size();
@@ -148,7 +148,7 @@ namespace event_system {
         }
 
         template<typename TEvent>
-        [[nodiscard]] size_t get_subscriber_count() const {
+        [[nodiscard]] size_t get_handler_count() const {
             auto it = subscribers_.find(typeid(TEvent));
             if (it == subscribers_.end()) { return 0; }
 
@@ -157,8 +157,7 @@ namespace event_system {
 
     protected:
         //TODO: Compare performance to list
-        EventSubscriberMap subscribers_;
-
+        EventHandlerMap subscribers_;
     };
 
 }

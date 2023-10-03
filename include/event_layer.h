@@ -6,7 +6,6 @@
 
 #include "base_event.h"
 #include "event_manager.h"
-#include "event_emitter.h"
 #include <memory>
 #include <string>
 #include <mutex>
@@ -14,6 +13,8 @@
 #include "event_handler.h"
 
 namespace event_system {
+
+    using EventCallback = std::function<void(const BaseEvent& event, LayerId sender_id)>;
 
     /**
      * @class EventLayer
@@ -24,11 +25,8 @@ namespace event_system {
      */
     class EventLayer {
     public:
-        explicit EventLayer(const std::shared_ptr<EventManager>& external_manager_ = nullptr) {
-            event_manager_ = std::make_shared<EventManager>();
-            event_emitter_ = EventEmitter{event_manager_, external_manager_};
-        }
-
+        explicit EventLayer(std::string layer_name = "")
+                : layer_name_(std::move(layer_name)) {}
         virtual ~EventLayer() = default;
 
         /**
@@ -58,8 +56,13 @@ namespace event_system {
          * @param event The event to emit.
          */
         // For events sourced from external layers
-        void OnExternalEvent(const BaseEvent& event) {
-            event_manager_->EmitEvent(event);
+        template<typename TEvent>
+        void OnExternalEvent(const TEvent& event) {
+            event_manager_.EmitEvent(event);
+        }
+
+        void set_layer_manager_callback(const EventCallback& callback) {
+            layer_manager_callback_ = callback;
         }
 
         /**
@@ -75,7 +78,7 @@ namespace event_system {
          * @returns size_t representing the total active handlers
          */
         size_t get_handler_count() const {
-            return event_manager_->get_subscriber_count();
+            return event_manager_.get_handler_count();
         }
 
     protected:
@@ -87,7 +90,7 @@ namespace event_system {
          */
         template<typename TEvent>
         void AddEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& handler) {
-            event_manager_->AddSubscriber(handler);
+            event_manager_.AddHandler(handler);
         }
 
         /**
@@ -97,7 +100,7 @@ namespace event_system {
          */
         template<typename TEvent>
         void RemoveEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& handler) {
-            event_manager_->RemoveSubscriber(handler);
+            event_manager_.RemoveHandler(handler);
         }
 
         // TODO: Default to all or none?
@@ -115,6 +118,17 @@ namespace event_system {
         }
 
         /**
+         * @brief Checks if this object is allowed to emit the given event
+         *
+         * @param event The event to check.
+         * @returns True if the event type is allowed.
+         */
+        virtual bool IsAllowedEvent(const BaseEvent& event) {
+            // By default, all event types are allowed
+            return true;
+        }
+
+        /**
          * @brief Emit an event through the local emitter.
          *
          * The emitter will run appropriate checks and decide weather or not to emit the event and
@@ -124,23 +138,22 @@ namespace event_system {
          */
         template <typename TEvent>
         void TriggerEvent(const TEvent& event) {
-            event_emitter_.Emit(event);
-        }
+            if (!IsAllowedEvent(event)) {
+                std::cerr << "Event type not allowed.\n";
+                return;
+            }
 
-        /**
-         * @brief Set the layers name.
-         *
-         * @param name The name of the layer.
-         */
-        void set_layer_name(const std::string& name) {
-            layer_name_ = name;
+            // Emit even locally and check if there is an external callback registered
+            event_manager_.EmitEvent(event);
+            if(layer_manager_callback_){
+                layer_manager_callback_(event, layer_name_);
+            }
         }
 
     private:
         // Points to the shared event manager
-        std::shared_ptr<EventManager> event_manager_;
-        // Used to emit local and global events
-        EventEmitter event_emitter_;
+        EventManager event_manager_;
+        EventCallback layer_manager_callback_;  // Callback to the LayerEventManager::OnEvent method
         std::string layer_name_;
         std::atomic<bool> should_stop_;
     };

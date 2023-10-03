@@ -6,6 +6,7 @@
 #include "event_handler.h"
 #include "base_event.h"
 #include <string>
+#include <iostream>
 
 using namespace event_system;
 
@@ -71,7 +72,7 @@ public:
 
 };
 
-int main() {
+int single_layer_driver() {
 
     std::cout << "** Single Layer Event System Example **\n\n";
 

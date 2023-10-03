@@ -22,38 +22,38 @@ protected:
 };
 
 TEST_F(EventManagerTest, AddSubscriberTest) {
-    local_event_manager->AddSubscriber(general_event_handler);
-    ASSERT_TRUE(local_event_manager->SubscriptionExists(general_event_handler));
+    local_event_manager->AddHandler(general_event_handler);
+    ASSERT_TRUE(local_event_manager->HandlerExists(general_event_handler));
 }
 
 TEST_F(EventManagerTest, AddDuplicateSubscriberTest) {
-    ASSERT_EQ(local_event_manager->get_subscriber_count(), 0);
-    local_event_manager->AddSubscriber(general_event_handler);
-    ASSERT_EQ(local_event_manager->get_subscriber_count(), 1);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 0);
+    local_event_manager->AddHandler(general_event_handler);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 1);
 }
 
 TEST_F(EventManagerTest, MultipleSubscriberTest) {
-    local_event_manager->AddSubscriber(general_event_handler);
+    local_event_manager->AddHandler(general_event_handler);
     std::shared_ptr<IEventHandler<GeneralEvent>> general_handler_2 = std::make_shared<TestEventHandler<GeneralEvent>>();
-    local_event_manager->AddSubscriber(general_handler_2);
+    local_event_manager->AddHandler(general_handler_2);
 
-    ASSERT_EQ(local_event_manager->get_subscriber_count(), 2);
-    ASSERT_EQ(local_event_manager->get_subscriber_count<BaseEvent>(), 0);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 2);
+    ASSERT_EQ(local_event_manager->get_handler_count<BaseEvent>(), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberTest) {
-    local_event_manager->AddSubscriber(general_event_handler);
-    ASSERT_EQ(local_event_manager->get_subscriber_count(), 1);
-    local_event_manager->RemoveSubscriber<GeneralEvent>(general_event_handler);
-    ASSERT_EQ(local_event_manager->get_subscriber_count(), 0);
+    local_event_manager->AddHandler(general_event_handler);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 1);
+    local_event_manager->RemoveHandler<GeneralEvent>(general_event_handler);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberFromEmptyMapTest) {
-    ASSERT_NO_THROW(local_event_manager->RemoveSubscriber<GeneralEvent>(general_event_handler));
+    ASSERT_NO_THROW(local_event_manager->RemoveHandler<GeneralEvent>(general_event_handler));
 }
 
 TEST_F(EventManagerTest, TriggerEventTest) {
-    local_event_manager->AddSubscriber(general_event_handler);
+    local_event_manager->AddHandler(general_event_handler);
     GeneralEvent general_event{GeneralEvents::GeneralSubType0};
 
     auto casted_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
@@ -64,9 +64,9 @@ TEST_F(EventManagerTest, TriggerEventTest) {
 }
 
 TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
-    local_event_manager->AddSubscriber(general_event_handler);
+    local_event_manager->AddHandler(general_event_handler);
     std::shared_ptr<IEventHandler<SpecificEvent>> specific_event_handler = std::make_shared<TestEventHandler<SpecificEvent>>();
-    local_event_manager->AddSubscriber(specific_event_handler);
+    local_event_manager->AddHandler(specific_event_handler);
 
     auto casted_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
     auto casted_handler_2 = std::static_pointer_cast<TestEventHandler<SpecificEvent>>(specific_event_handler);
@@ -82,11 +82,11 @@ TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
 }
 
 TEST_F(EventManagerTest, DanglingPointerTest) {
-    local_event_manager->AddSubscriber(general_event_handler);
+    local_event_manager->AddHandler(general_event_handler);
     general_event_handler.reset();
 
     GeneralEvent generalEvent{GeneralEvents::GeneralSubType0};
     local_event_manager->EmitEvent(generalEvent);
 
-    ASSERT_EQ(local_event_manager->get_subscriber_count<GeneralEvent>(), 0);
+    ASSERT_EQ(local_event_manager->get_handler_count<GeneralEvent>(), 0);
 }
