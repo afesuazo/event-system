@@ -2,82 +2,73 @@
 // Created by Andres Suazo
 //
 
+#include <iostream>
 #include "event_layer.h"
 #include "event_handler.h"
 #include "base_event.h"
-#include <string>
+#include <thread>
+#include <utility>
 
 using namespace event_system;
 
-enum class GeneralEvents {
+enum class MGeneralEvents {
     GeneralSubType0,
     GeneralSubType1,
 };
 
-enum class SpecificEvents {
-    SpecificSubType0,
-    SpecificSubType1,
-};
-
-class GeneralEvent : public BaseEvent {
+class MGeneralEvent : public BaseEvent {
 public:
-    explicit GeneralEvent(GeneralEvents sub_type) : sub_type_(sub_type) {
+    explicit MGeneralEvent(LayerId layer_id, MGeneralEvents sub_type) : BaseEvent(std::move(layer_id)), sub_type_(sub_type) {
         event_name_ = "GeneralEvent";
     }
 
-    [[nodiscard]] GeneralEvents get_sub_type() const {
+    [[nodiscard]] MGeneralEvents get_sub_type() const {
         return sub_type_;
     }
 
 private:
-    GeneralEvents sub_type_;
+    MGeneralEvents sub_type_;
 };
 
-class SpecificEvent : public BaseEvent {
+class MGeneralEventHandler : public IEventHandler<MGeneralEvent> {
+    void HandleEvent(const MGeneralEvent& event) override {
+        std::cout << "General event handled in layer: " << event.get_sender_id() << "\n";
+    }
+};
+
+class MSampleLayer : public EventLayer {
 public:
-    explicit SpecificEvent(SpecificEvents sub_type) : sub_type_(sub_type) {
-        event_name_ = "SpecificEvent";
-    }
 
-    [[nodiscard]] SpecificEvents get_sub_type() const {
-        return sub_type_;
-    }
-
-private:
-    SpecificEvents sub_type_;
-};
-
-class GeneralEventHandler : public IEventHandler<GeneralEvent> {
-    void HandleEvent(const GeneralEvent& event) override {
-        std::cout << "General event handled\n";
-    }
-};
-
-class SampleLayer : public EventLayer {
-public:
+    using EventLayer::EventLayer;
 
     void Run() override {
-        std::shared_ptr<IEventHandler<GeneralEvent>>
-                general_handler_1 = std::make_shared<GeneralEventHandler>();
+        std::shared_ptr<IEventHandler<MGeneralEvent>>
+                general_handler_1 = std::make_shared<MGeneralEventHandler>();
 
         AddEventHandler(general_handler_1);
 
-        GeneralEvent general_event_1{GeneralEvents::GeneralSubType1};
-        SpecificEvent specific_event_0{SpecificEvents::SpecificSubType0};
-
-        TriggerEvent(specific_event_0); // Should not emit an event
+        MGeneralEvent general_event_1{get_layer_name(), MGeneralEvents::GeneralSubType1};
         TriggerEvent(general_event_1);
     }
 
 };
 
+
 int main() {
 
-    std::cout << "** Single Layer Event System Example **\n\n";
+    std::cout << "** Multiple Layer Event System Example **\n\n";
 
     // Set application layers
-    SampleLayer sample_layer{};
-    sample_layer.Run();
+    MSampleLayer layer_1{"layer_1"};
+    MSampleLayer layer_2{"layer_2"};
 
-    return 0;
+    // Run each layer
+    std::thread run_layer_1(&EventLayer::Run, &layer_1);
+    std::thread run_layer_2(&EventLayer::Run, &layer_2);
+
+    // Join all layer threads
+    layer_1.Stop();
+    layer_2.Stop();
+    run_layer_1.join();
+    run_layer_2.join();
 }

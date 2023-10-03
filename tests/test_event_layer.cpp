@@ -58,7 +58,7 @@ public:
         TriggerEvent(event);
     }
 
-    bool IsAllowedEvent(const BaseEvent& event) {
+    bool IsAllowedEvent(const BaseEvent& event) override {
         // By default, all event types are allowed
         return typeid(event) != typeid(GeneralEvent);
     }
@@ -122,10 +122,4 @@ TEST(EventLayerTest, InvalidEventEmissionTest) {
 
     auto casted_event_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
     EXPECT_FALSE(casted_event_handler->event_triggered);
-}
-
-TEST(EventLayerTest, ExternalManagerPropagationTest) {
-
-
-
 }

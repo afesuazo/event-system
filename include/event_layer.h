@@ -25,7 +25,8 @@ namespace event_system {
      */
     class EventLayer {
     public:
-        EventLayer() = default;
+        explicit EventLayer(std::string layer_name = "")
+                : layer_name_(std::move(layer_name)) {}
         virtual ~EventLayer() = default;
 
         /**
@@ -146,15 +147,6 @@ namespace event_system {
             if(layer_manager_callback_){
                 layer_manager_callback_(event, layer_name_);
             }
-        }
-
-        /**
-         * @brief Set the layers name.
-         *
-         * @param name The name of the layer.
-         */
-        void set_layer_name(const std::string& name) {
-            layer_name_ = name;
         }
 
     private:
