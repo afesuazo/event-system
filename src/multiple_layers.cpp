@@ -12,23 +12,23 @@
 
 using namespace event_system;
 
-enum class MGeneralEvents {
-    GeneralSubType0,
-    GeneralSubType1,
-};
 
 class MGeneralEvent : public BaseEvent {
 public:
-    explicit MGeneralEvent(LayerId layer_id, MGeneralEvents sub_type) : BaseEvent(std::move(layer_id)), sub_type_(sub_type) {
-        event_name_ = "GeneralEvent";
+    EVENT_CLASS_TYPE(GeneralEvent)
+
+    explicit MGeneralEvent(std::string sender_id = "") : sender_id_(sender_id) {}
+
+    [[nodiscard]] std::string get_name() const override {
+        return "General Event 1";
     }
 
-    [[nodiscard]] MGeneralEvents get_sub_type() const {
-        return sub_type_;
+    [[nodiscard]] std::string get_sender_id() const override {
+        return sender_id_;
     }
 
 private:
-    MGeneralEvents sub_type_;
+    std::string sender_id_;
 };
 
 class MGeneralEventHandler : public IEventHandler<MGeneralEvent> {
@@ -48,7 +48,7 @@ public:
 
         AddEventHandler(general_handler_1);
 
-        MGeneralEvent general_event_1{get_layer_name(), MGeneralEvents::GeneralSubType1};
+        MGeneralEvent general_event_1{get_layer_name()};
         TriggerEvent(general_event_1);
     }
 

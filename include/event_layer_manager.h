@@ -30,8 +30,7 @@ namespace event_system {
                                          }), layers_.end());
         }
 
-        template<typename TEvent>
-        void OnEvent(const TEvent& event, const std::string& sender_id) {
+        void OnEvent(const BaseEvent& event, const std::string& sender_id) {
             for (auto it = layers_.begin(); it != layers_.end();) {
                 if (auto layer = it->lock()) {
                     // Avoid sending the event back to the sender layer

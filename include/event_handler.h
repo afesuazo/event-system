@@ -49,7 +49,7 @@ namespace event_system {
         }
 
         [[nodiscard]] EventType GetHandledEventType() const override {
-            return TEvent::GetStaticType();
+            return TEvent::get_static_type();
         }
 
     protected:

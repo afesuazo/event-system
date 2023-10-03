@@ -11,6 +11,8 @@ namespace event_system {
 
     enum class EventType {
         None = 0,
+        GeneralEvent,
+        SpecificEvent
         // ...
     };
 
