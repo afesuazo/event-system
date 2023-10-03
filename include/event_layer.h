@@ -75,7 +75,7 @@ namespace event_system {
          * @returns size_t representing the total active handlers
          */
         size_t get_handler_count() const {
-            return event_manager_->get_subscriber_count();
+            return event_manager_->get_handler_count();
         }
 
     protected:
@@ -87,7 +87,7 @@ namespace event_system {
          */
         template<typename TEvent>
         void AddEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& handler) {
-            event_manager_->AddSubscriber(handler);
+            event_manager_->AddHandler(handler);
         }
 
         /**
@@ -97,7 +97,7 @@ namespace event_system {
          */
         template<typename TEvent>
         void RemoveEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& handler) {
-            event_manager_->RemoveSubscriber(handler);
+            event_manager_->RemoveHandler(handler);
         }
 
         // TODO: Default to all or none?

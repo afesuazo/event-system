@@ -6,6 +6,7 @@
 #include <iostream>
 #include "event_manager.h"
 #include "base_event.h"
+#include "event_layer_manager.h"
 
 namespace event_system {
 
@@ -23,8 +24,8 @@ namespace event_system {
         EventEmitter() = default;
 
         EventEmitter(const std::shared_ptr<EventManager>& manager,
-                     const std::shared_ptr<EventManager>& external_manager_)
-                : event_manager_(manager), external_event_manager_(external_manager_) {}
+                     const std::shared_ptr<EventLayerManager>& layer_manager)
+                : event_manager_(manager), layer_manager_(layer_manager) {}
 
         ~EventEmitter() = default;
 
@@ -44,13 +45,13 @@ namespace event_system {
             }
 
             auto shared_manager = event_manager_.lock();
-            auto shared_external_manager = external_event_manager_.lock();
+            auto shared_layer_manager = layer_manager_.lock();
 
             // Layer with no event manager can still emit
-            // Layer with no external event manager can be used if events don't need to propagate
+            // Layer with no layer manager can be used if events don't need to propagate
             // If both are missing, emitter does nothing
-            if (!shared_manager && !shared_external_manager) {
-                std::cerr << "Both EventManager and External Event Handler are not available or unset.\n";
+            if (!shared_manager && !shared_layer_manager) {
+                std::cerr << "Both EventManager and EventLayerManager are not available or unset.\n";
                 return;
             }
 
@@ -63,11 +64,11 @@ namespace event_system {
             }
 
             // Send event to parent application
-            if (shared_external_manager) {
+            if (shared_layer_manager) {
                 try {
-                    shared_external_manager->EmitEvent(event);
+                    shared_layer_manager->OnEvent(event);
                 } catch (const std::exception& e) {
-                    std::cerr << "Exception caught when emitting event to External Event Handler: " << e.what() << '\n';
+                    std::cerr << "Exception caught when emitting event to EventLayerManager: " << e.what() << '\n';
                 }
             }
         }
@@ -76,8 +77,8 @@ namespace event_system {
             event_manager_ = manager;
         }
 
-        void set_external_manager(const std::shared_ptr<EventManager>& external_manager_) {
-            external_event_manager_ = external_manager_;
+        void set_layer_manager(const std::shared_ptr<EventLayerManager>& layer_manager) {
+            layer_manager_ = layer_manager;
         }
 
     protected:
@@ -94,7 +95,7 @@ namespace event_system {
 
     private:
         std::weak_ptr<EventManager> event_manager_;
-        std::weak_ptr<EventManager> external_event_manager_;  // Parent application manager
+        std::weak_ptr<EventLayerManager> layer_manager_;  // Parent application manager
     };
 
 }
