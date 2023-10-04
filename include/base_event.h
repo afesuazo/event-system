@@ -3,13 +3,21 @@
 //
 
 #pragma once
-#include <typeindex>
 #include <string>
-#include <utility>
 
 namespace event_system {
 
-    using LayerId = std::string;
+    enum class EventType {
+        None = 0,
+        GeneralEvent,
+        SpecificEvent
+        // ...
+    };
+
+#define EVENT_CLASS_TYPE(type) \
+    static EventType get_static_type() { return EventType::type; } \
+    virtual EventType get_event_type() const override { return get_static_type(); }
+
 
     /**
      * @class BaseEvent
@@ -20,28 +28,11 @@ namespace event_system {
      */
     class BaseEvent {
     public:
-
-        explicit BaseEvent(LayerId layer_id = "")
-                : layer_id_(std::move(layer_id)) {}
-
         virtual ~BaseEvent() = default;
 
-        [[nodiscard]] std::type_index get_type() const {
-            return typeid(*this); // Class Type
-        };
-
-        [[nodiscard]] std::string get_name() const {
-            return event_name_;
-        };
-
-        [[nodiscard]] LayerId get_sender_id() const {
-            return layer_id_;
-        }
-
-    protected:
-        std::string event_name_ = get_type().name();
-        LayerId layer_id_;  // ID of the layer that generated the event
-
+        [[nodiscard]] virtual EventType get_event_type() const = 0;
+        [[nodiscard]] virtual std::string get_name() const = 0;
+        [[nodiscard]] virtual std::string get_sender_id() const = 0;
     };
 
 

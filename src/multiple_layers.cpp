@@ -12,23 +12,22 @@
 
 using namespace event_system;
 
-enum class MGeneralEvents {
-    GeneralSubType0,
-    GeneralSubType1,
-};
-
 class MGeneralEvent : public BaseEvent {
 public:
-    explicit MGeneralEvent(LayerId layer_id, MGeneralEvents sub_type) : BaseEvent(std::move(layer_id)), sub_type_(sub_type) {
-        event_name_ = "GeneralEvent";
+    EVENT_CLASS_TYPE(GeneralEvent)
+
+    explicit MGeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+
+    [[nodiscard]] std::string get_name() const override {
+        return "General Event 1";
     }
 
-    [[nodiscard]] MGeneralEvents get_sub_type() const {
-        return sub_type_;
+    [[nodiscard]] std::string get_sender_id() const override {
+        return sender_id_;
     }
 
 private:
-    MGeneralEvents sub_type_;
+    std::string sender_id_;
 };
 
 class MGeneralEventHandler : public IEventHandler<MGeneralEvent> {
@@ -48,12 +47,33 @@ public:
 
         AddEventHandler(general_handler_1);
 
-        MGeneralEvent general_event_1{get_layer_name(), MGeneralEvents::GeneralSubType1};
+        MGeneralEvent general_event_1{get_layer_name()};
         TriggerEvent(general_event_1);
+
+        while (!ShouldStop()){
+
+        }
     }
 
 };
 
+class MSampleLayer2 : public EventLayer {
+public:
+
+    using EventLayer::EventLayer;
+
+    void Run() override {
+        std::shared_ptr<IEventHandler<MGeneralEvent>>
+                general_handler_1 = std::make_shared<MGeneralEventHandler>();
+
+        AddEventHandler(general_handler_1);
+
+        while (!ShouldStop()){
+
+        }
+    }
+
+};
 
 int main() {
 
@@ -63,7 +83,7 @@ int main() {
 
     // Set application layers
     std::shared_ptr<EventLayer> layer_1 = std::make_shared<MSampleLayer>("layer_1");
-    std::shared_ptr<EventLayer> layer_2 = std::make_shared<MSampleLayer>("layer_2");
+    std::shared_ptr<EventLayer> layer_2 = std::make_shared<MSampleLayer2>("layer_2");
 
     layer_manager.RegisterLayer(layer_1);
     layer_manager.RegisterLayer(layer_2);
@@ -71,6 +91,8 @@ int main() {
     // Run each layer
     std::thread run_layer_1(&EventLayer::Run, layer_1);
     std::thread run_layer_2(&EventLayer::Run, layer_2);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     // Join all layer threads
     layer_1->Stop();

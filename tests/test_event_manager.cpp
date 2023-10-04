@@ -38,23 +38,23 @@ TEST_F(EventManagerTest, MultipleSubscriberTest) {
     local_event_manager->AddHandler(general_handler_2);
 
     ASSERT_EQ(local_event_manager->get_handler_count(), 2);
-    ASSERT_EQ(local_event_manager->get_handler_count<BaseEvent>(), 0);
+    ASSERT_EQ(local_event_manager->get_handler_count(EventType::SpecificEvent), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberTest) {
     local_event_manager->AddHandler(general_event_handler);
     ASSERT_EQ(local_event_manager->get_handler_count(), 1);
-    local_event_manager->RemoveHandler<GeneralEvent>(general_event_handler);
+    local_event_manager->RemoveHandler(general_event_handler);
     ASSERT_EQ(local_event_manager->get_handler_count(), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberFromEmptyMapTest) {
-    ASSERT_NO_THROW(local_event_manager->RemoveHandler<GeneralEvent>(general_event_handler));
+    ASSERT_NO_THROW(local_event_manager->RemoveHandler(general_event_handler));
 }
 
 TEST_F(EventManagerTest, TriggerEventTest) {
     local_event_manager->AddHandler(general_event_handler);
-    GeneralEvent general_event{GeneralEvents::GeneralSubType0};
+    GeneralEvent general_event{};
 
     auto casted_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
 
@@ -74,9 +74,9 @@ TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
     EXPECT_FALSE(casted_handler->event_triggered);
     EXPECT_FALSE(casted_handler_2->event_triggered);
 
-    GeneralEvent generalEvent{GeneralEvents::GeneralSubType0};
+    GeneralEvent generalEvent{};
 
-    local_event_manager->EmitEvent<GeneralEvent>(generalEvent);
+    local_event_manager->EmitEvent(generalEvent);
     EXPECT_TRUE(casted_handler->event_triggered);
     EXPECT_FALSE(casted_handler_2->event_triggered);
 }
@@ -85,8 +85,8 @@ TEST_F(EventManagerTest, DanglingPointerTest) {
     local_event_manager->AddHandler(general_event_handler);
     general_event_handler.reset();
 
-    GeneralEvent generalEvent{GeneralEvents::GeneralSubType0};
+    GeneralEvent generalEvent{};
     local_event_manager->EmitEvent(generalEvent);
 
-    ASSERT_EQ(local_event_manager->get_handler_count<GeneralEvent>(), 0);
+    ASSERT_EQ(local_event_manager->get_handler_count(EventType::GeneralEvent), 0);
 }

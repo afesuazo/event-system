@@ -6,15 +6,14 @@
 
 #include "base_event.h"
 #include "event_manager.h"
+#include "event_handler.h"
 #include <memory>
 #include <string>
-#include <mutex>
 #include <atomic>
-#include "event_handler.h"
 
 namespace event_system {
 
-    using EventCallback = std::function<void(const BaseEvent& event, LayerId sender_id)>;
+    using EventCallback = std::function<void(const BaseEvent& event, std::string sender_id)>;
 
     /**
      * @class EventLayer
@@ -56,8 +55,7 @@ namespace event_system {
          * @param event The event to emit.
          */
         // For events sourced from external layers
-        template<typename TEvent>
-        void OnExternalEvent(const TEvent& event) {
+        void OnExternalEvent(const BaseEvent& event) {
             event_manager_.EmitEvent(event);
         }
 
@@ -88,8 +86,7 @@ namespace event_system {
          *
          * @param handler A reference to the handler object to add.
          */
-        template<typename TEvent>
-        void AddEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& handler) {
+        void AddEventHandler(const std::shared_ptr<IEventHandlerBase>& handler) {
             event_manager_.AddHandler(handler);
         }
 
@@ -98,8 +95,7 @@ namespace event_system {
          *
          * @param handler A reference to the handler object to remove.
          */
-        template<typename TEvent>
-        void RemoveEventHandler(const std::shared_ptr<IEventHandler<TEvent>>& handler) {
+        void RemoveEventHandler(const std::shared_ptr<IEventHandlerBase>& handler) {
             event_manager_.RemoveHandler(handler);
         }
 
@@ -136,8 +132,7 @@ namespace event_system {
          *
          * @param event The event to emit.
          */
-        template <typename TEvent>
-        void TriggerEvent(const TEvent& event) {
+        void TriggerEvent(const BaseEvent& event) {
             if (!IsAllowedEvent(event)) {
                 std::cerr << "Event type not allowed.\n";
                 return;

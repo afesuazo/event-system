@@ -102,7 +102,7 @@ TEST(EventLayerTest, ValidEventEmissionTest) {
 
     event_layer.PublicAddHandler(specific_event_handler);
 
-    SpecificEvent specific_event{SpecificEvents::SpecificSubType1};
+    SpecificEvent specific_event{};
     event_layer.PublicTriggerEvent(specific_event);
 
     auto casted_event_handler = std::static_pointer_cast<TestEventHandler<SpecificEvent>>(specific_event_handler);
@@ -117,7 +117,7 @@ TEST(EventLayerTest, InvalidEventEmissionTest) {
 
     event_layer.PublicAddHandler(general_event_handler);
 
-    GeneralEvent general_event{GeneralEvents::GeneralSubType0};
+    GeneralEvent general_event{};
     event_layer.PublicTriggerEvent(general_event);
 
     auto casted_event_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);

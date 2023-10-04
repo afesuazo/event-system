@@ -10,42 +10,40 @@
 
 using namespace event_system;
 
-enum class GeneralEvents {
-    GeneralSubType0,
-    GeneralSubType1,
-};
-
-enum class SpecificEvents {
-    SpecificSubType0,
-    SpecificSubType1,
-};
-
 class GeneralEvent : public BaseEvent {
 public:
-    explicit GeneralEvent(GeneralEvents sub_type) : sub_type_(sub_type) {
-        event_name_ = "GeneralEvent";
+    EVENT_CLASS_TYPE(GeneralEvent)
+
+    explicit GeneralEvent(std::string sender_id = "") : sender_id_(sender_id) {}
+
+    [[nodiscard]] std::string get_name() const override {
+        return "General Event 1";
     }
 
-    [[nodiscard]] GeneralEvents get_sub_type() const {
-        return sub_type_;
+    [[nodiscard]] std::string get_sender_id() const override {
+        return sender_id_;
     }
 
 private:
-    GeneralEvents sub_type_;
+    std::string sender_id_;
 };
 
 class SpecificEvent : public BaseEvent {
 public:
-    explicit SpecificEvent(SpecificEvents sub_type) : sub_type_(sub_type) {
-        event_name_ = "SpecificEvent";
+    EVENT_CLASS_TYPE(SpecificEvent)
+
+    explicit SpecificEvent(std::string sender_id = "") : sender_id_(sender_id) {}
+
+    [[nodiscard]] std::string get_name() const override {
+        return "Specific Event 1";
     }
 
-    [[nodiscard]] SpecificEvents get_sub_type() const {
-        return sub_type_;
+    [[nodiscard]] std::string get_sender_id() const override {
+        return sender_id_;
     }
 
 private:
-    SpecificEvents sub_type_;
+    std::string sender_id_;
 };
 
 class GeneralEventHandler : public IEventHandler<GeneralEvent> {
@@ -63,8 +61,8 @@ public:
 
         AddEventHandler(general_handler_1);
 
-        GeneralEvent general_event_1{GeneralEvents::GeneralSubType1};
-        SpecificEvent specific_event_0{SpecificEvents::SpecificSubType0};
+        GeneralEvent general_event_1{get_layer_name()};
+        SpecificEvent specific_event_0{get_layer_name()};
 
         TriggerEvent(specific_event_0); // Should not emit an event
         TriggerEvent(general_event_1);

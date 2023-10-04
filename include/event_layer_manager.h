@@ -5,7 +5,6 @@
 #pragma once
 #include "base_event.h"
 #include "event_layer.h"
-#include <functional>
 
 namespace event_system {
 
@@ -15,7 +14,7 @@ namespace event_system {
         ~EventLayerManager() = default;
 
         void RegisterLayer(std::shared_ptr<EventLayer>& layer) {
-            auto callback = [this](const auto& event, const std::string& sender_id) {
+            auto callback = [this](const BaseEvent& event, const std::string& sender_id) {
                 this->OnEvent(event, sender_id);
             };
             layer->set_layer_manager_callback(callback);
@@ -30,8 +29,7 @@ namespace event_system {
                                          }), layers_.end());
         }
 
-        template<typename TEvent>
-        void OnEvent(const TEvent& event, const std::string& sender_id) {
+        void OnEvent(const BaseEvent& event, const std::string& sender_id) {
             for (auto it = layers_.begin(); it != layers_.end();) {
                 if (auto layer = it->lock()) {
                     // Avoid sending the event back to the sender layer

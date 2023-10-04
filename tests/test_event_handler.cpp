@@ -18,7 +18,7 @@ protected:
 };
 
 TEST_F(EventHandlerTest, DerivedOnEventTriggeredTest) {
-    GeneralEvent general_event{GeneralEvents::GeneralSubType0};
+    GeneralEvent general_event{};
     general_event_handler->OnEvent(general_event);
 
     auto casted_event_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
@@ -27,7 +27,7 @@ TEST_F(EventHandlerTest, DerivedOnEventTriggeredTest) {
 
 // Disabled for now as I opted to use a static cast in the event handler class
 TEST_F(EventHandlerTest, DISABLED_ProperEventTypeTest) {
-    SpecificEvent specificEvent{SpecificEvents::SpecificSubType0};
+    SpecificEvent specificEvent{};
     general_event_handler->OnEvent(specificEvent);
 
     auto casted_event_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
