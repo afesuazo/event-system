@@ -3,9 +3,7 @@
 //
 
 #pragma once
-#include <typeindex>
 #include <string>
-#include <utility>
 
 namespace event_system {
 

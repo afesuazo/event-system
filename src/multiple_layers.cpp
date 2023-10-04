@@ -12,7 +12,6 @@
 
 using namespace event_system;
 
-
 class MGeneralEvent : public BaseEvent {
 public:
     EVENT_CLASS_TYPE(GeneralEvent)
