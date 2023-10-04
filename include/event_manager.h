@@ -11,6 +11,7 @@
 #include <memory>
 #include <iostream>
 #include "event_handler.h"
+#include <string>
 
 namespace event_system {
 

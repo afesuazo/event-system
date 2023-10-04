@@ -15,7 +15,7 @@ namespace event_system {
         ~EventLayerManager() = default;
 
         void RegisterLayer(std::shared_ptr<EventLayer>& layer) {
-            auto callback = [this](const auto& event, const std::string& sender_id) {
+            auto callback = [this](const BaseEvent& event, const std::string& sender_id) {
                 this->OnEvent(event, sender_id);
             };
             layer->set_layer_manager_callback(callback);
