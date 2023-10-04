@@ -12,11 +12,11 @@ namespace event_system {
         should_stop_ = true;
     }
 
-    void EventLayer::OnExternalEvent(const event_system::BaseEvent& event) {
+    void EventLayer::OnExternalEvent(const BaseEvent& event) {
         event_manager_.EmitEvent(event);
     }
 
-    void EventLayer::set_layer_manager_callback(const event_system::EventCallback& callback) {
+    void EventLayer::set_layer_manager_callback(const EventCallback& callback) {
         layer_manager_callback_ = callback;
     }
 
@@ -40,12 +40,12 @@ namespace event_system {
         return should_stop_;
     }
 
-    bool EventLayer::IsAllowedEvent(const event_system::BaseEvent& event) {
+    bool EventLayer::IsAllowedEvent(const BaseEvent& event) {
         // By default, all event types are allowed
         return true;
     }
 
-    void EventLayer::TriggerEvent(const event_system::BaseEvent& event) {
+    void EventLayer::TriggerEvent(const BaseEvent& event) {
         if (!IsAllowedEvent(event)) {
             std::cerr << "Event type not allowed.\n";
             return;

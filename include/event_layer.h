@@ -72,6 +72,14 @@ namespace event_system {
          */
         size_t get_handler_count() const;
 
+        /**
+         * @brief Checks if this object is allowed to emit the given event type
+         *
+         * @param event The event to check.
+         * @returns True if the event type is allowed.
+         */
+        virtual bool IsAllowedEvent(const BaseEvent& event);
+
     protected:
 
         /**
@@ -94,14 +102,6 @@ namespace event_system {
          * @returns True if layer should stop.
          */
         bool ShouldStop();
-
-        /**
-         * @brief Checks if this object is allowed to emit the given event type
-         *
-         * @param event The event to check.
-         * @returns True if the event type is allowed.
-         */
-        virtual bool IsAllowedEvent(const BaseEvent& event);
 
         /**
          * @brief Emit an event within the layer
