@@ -73,12 +73,21 @@ namespace event_system {
         size_t get_handler_count() const;
 
         /**
+         * @brief Set which events are allowed to be emitted within this layer
+         *
+         * @param event_mask Integer representing the event or events that should be allowed
+         */
+        void set_allowed_events(int event_mask) {
+            allowed_events_ = event_mask;
+        }
+
+        /**
          * @brief Checks if this object is allowed to emit the given event type
          *
          * @param event The event to check.
          * @returns True if the event type is allowed.
          */
-        virtual bool IsAllowedEvent(const BaseEvent& event);
+         bool IsAllowedEvent(const BaseEvent& event) const;
 
     protected:
 
@@ -118,6 +127,7 @@ namespace event_system {
         EventCallback layer_manager_callback_;  // Callback to the LayerEventManager::OnEvent method
         std::string layer_name_;
         std::atomic<bool> should_stop_;
+        int allowed_events_;
     };
 
 }

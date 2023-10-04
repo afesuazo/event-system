@@ -13,11 +13,11 @@ using namespace event_system;
 class EventManagerTest : public ::testing::Test {
 protected:
     std::shared_ptr<EventManager> local_event_manager;
-    std::shared_ptr<IEventHandler<GeneralEvent>> general_event_handler;
+    std::shared_ptr<IEventHandler<TestGeneralEvent>> general_event_handler;
 
     void SetUp() override {
         local_event_manager = std::make_shared<EventManager>();
-        general_event_handler = std::make_shared<TestEventHandler<GeneralEvent>>();
+        general_event_handler = std::make_shared<TestEventHandler<TestGeneralEvent>>();
     }
 };
 
@@ -34,7 +34,7 @@ TEST_F(EventManagerTest, AddDuplicateSubscriberTest) {
 
 TEST_F(EventManagerTest, MultipleSubscriberTest) {
     local_event_manager->AddHandler(general_event_handler);
-    std::shared_ptr<IEventHandler<GeneralEvent>> general_handler_2 = std::make_shared<TestEventHandler<GeneralEvent>>();
+    std::shared_ptr<IEventHandler<TestGeneralEvent>> general_handler_2 = std::make_shared<TestEventHandler<TestGeneralEvent>>();
     local_event_manager->AddHandler(general_handler_2);
 
     ASSERT_EQ(local_event_manager->get_handler_count(), 2);
@@ -54,9 +54,9 @@ TEST_F(EventManagerTest, RemoveSubscriberFromEmptyMapTest) {
 
 TEST_F(EventManagerTest, TriggerEventTest) {
     local_event_manager->AddHandler(general_event_handler);
-    GeneralEvent general_event{};
+    TestGeneralEvent general_event{};
 
-    auto casted_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
+    auto casted_handler = std::static_pointer_cast<TestEventHandler<TestGeneralEvent>>(general_event_handler);
 
     EXPECT_FALSE(casted_handler->event_triggered);
     local_event_manager->EmitEvent(general_event);
@@ -65,16 +65,16 @@ TEST_F(EventManagerTest, TriggerEventTest) {
 
 TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
     local_event_manager->AddHandler(general_event_handler);
-    std::shared_ptr<IEventHandler<SpecificEvent>> specific_event_handler = std::make_shared<TestEventHandler<SpecificEvent>>();
+    std::shared_ptr<IEventHandler<TestSpecificEvent>> specific_event_handler = std::make_shared<TestEventHandler<TestSpecificEvent>>();
     local_event_manager->AddHandler(specific_event_handler);
 
-    auto casted_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
-    auto casted_handler_2 = std::static_pointer_cast<TestEventHandler<SpecificEvent>>(specific_event_handler);
+    auto casted_handler = std::static_pointer_cast<TestEventHandler<TestGeneralEvent>>(general_event_handler);
+    auto casted_handler_2 = std::static_pointer_cast<TestEventHandler<TestSpecificEvent>>(specific_event_handler);
 
     EXPECT_FALSE(casted_handler->event_triggered);
     EXPECT_FALSE(casted_handler_2->event_triggered);
 
-    GeneralEvent generalEvent{};
+    TestGeneralEvent generalEvent{};
 
     local_event_manager->EmitEvent(generalEvent);
     EXPECT_TRUE(casted_handler->event_triggered);
@@ -85,7 +85,7 @@ TEST_F(EventManagerTest, DanglingPointerTest) {
     local_event_manager->AddHandler(general_event_handler);
     general_event_handler.reset();
 
-    GeneralEvent generalEvent{};
+    TestGeneralEvent generalEvent{};
     local_event_manager->EmitEvent(generalEvent);
 
     ASSERT_EQ(local_event_manager->get_handler_count(EventType::GeneralEvent), 0);

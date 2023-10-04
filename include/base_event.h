@@ -8,11 +8,10 @@
 
 namespace event_system {
 
-    enum class EventType {
-        None = 0,
-        GeneralEvent,
-        SpecificEvent
-        // ...
+    enum EventType {
+        None                  = 0,
+        GeneralEvent          = 1 << 0,   // 1
+        SpecificEvent         = 1 << 1,   // 2
     };
 
 #define EVENT_CLASS_TYPE(type) \
