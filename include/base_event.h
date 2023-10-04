@@ -3,10 +3,21 @@
 //
 
 #pragma once
-#include <typeindex>
+
 #include <string>
 
-namespace event_manager {
+namespace event_system {
+
+    enum EventType {
+        None                  = 0,
+        GeneralEvent          = 1 << 0,   // 1
+        SpecificEvent         = 1 << 1,   // 2
+    };
+
+#define EVENT_CLASS_TYPE(type) \
+    static EventType get_static_type() { return EventType::type; } \
+    virtual EventType get_event_type() const override { return get_static_type(); }
+
 
     /**
      * @class BaseEvent
@@ -17,29 +28,13 @@ namespace event_manager {
      */
     class BaseEvent {
     public:
-
         virtual ~BaseEvent() = default;
 
-        [[nodiscard]] std::type_index GetType() const {
-            return typeid(this); // Class Type
-        };
+        [[nodiscard]] virtual EventType get_event_type() const = 0;
 
-        [[nodiscard]] std::string getName() const {
-            return eventName;
-        };
+        [[nodiscard]] virtual std::string get_name() const = 0;
 
-        /**
-         * @brief Get the sub-type of the event
-         *
-         * This is a virtual method that must be implemented by any derived class. It allows greater granularity
-         * withing an event type by specify a sub-type
-         *
-         * @returns Int representing a specific event sub-type/identifier
-         * @note Currently returns an int but this will be switched to an enum less error prone code.
-         */
-        [[nodiscard]] virtual int GetSubType() const = 0; // TODO: Switch to an enum
-    protected:
-        std::string eventName = GetType().name();
+        [[nodiscard]] virtual std::string get_sender_id() const = 0;
     };
 
 

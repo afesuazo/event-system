@@ -5,88 +5,88 @@
 #include "gtest/gtest.h"
 #include "event_manager.h"
 #include "base_event.h"
-#include "event_listener.h"
 #include "testing_utils.h"
 #include <memory>
 
-using namespace event_manager;
+using namespace event_system;
 
 class EventManagerTest : public ::testing::Test {
 protected:
-    std::shared_ptr<EventManager> eventManager;
-    std::shared_ptr<IEventListener<GeneralEvent>> generalEventListener;
+    std::shared_ptr<EventManager> local_event_manager;
+    std::shared_ptr<IEventHandler<TestGeneralEvent>> general_event_handler;
 
     void SetUp() override {
-        eventManager = std::make_shared<EventManager>();
-        generalEventListener = std::make_shared<GeneralEventListener>();
+        local_event_manager = std::make_shared<EventManager>();
+        general_event_handler = std::make_shared<TestEventHandler<TestGeneralEvent>>();
     }
 };
 
 TEST_F(EventManagerTest, AddSubscriberTest) {
-    eventManager->AddSubscriber(generalEventListener);
-    ASSERT_TRUE(eventManager->SubscriptionExists(generalEventListener));
+    local_event_manager->AddHandler(general_event_handler);
+    ASSERT_TRUE(local_event_manager->HandlerExists(general_event_handler));
 }
 
 TEST_F(EventManagerTest, AddDuplicateSubscriberTest) {
-    ASSERT_EQ(eventManager->GetSubscriberCount(), 0);
-    eventManager->AddSubscriber(generalEventListener);
-    ASSERT_EQ(eventManager->GetSubscriberCount(), 1);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 0);
+    local_event_manager->AddHandler(general_event_handler);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 1);
 }
 
 TEST_F(EventManagerTest, MultipleSubscriberTest) {
-    eventManager->AddSubscriber(generalEventListener);
-    std::shared_ptr<IEventListener<GeneralEvent>> generalListener2 = std::make_shared<GeneralEventListener>();
-    eventManager->AddSubscriber(generalListener2);
+    local_event_manager->AddHandler(general_event_handler);
+    std::shared_ptr<IEventHandler<TestGeneralEvent>> general_handler_2 = std::make_shared<TestEventHandler<TestGeneralEvent>>();
+    local_event_manager->AddHandler(general_handler_2);
 
-    ASSERT_EQ(eventManager->GetSubscriberCount(), 2);
-    ASSERT_EQ(eventManager->GetSubscriberCount<BaseEvent>(), 0);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 2);
+    ASSERT_EQ(local_event_manager->get_handler_count(EventType::SpecificEvent), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberTest) {
-    eventManager->AddSubscriber(generalEventListener);
-    ASSERT_EQ(eventManager->GetSubscriberCount(), 1);
-    eventManager->RemoveSubscriber<GeneralEvent>(generalEventListener);
-    ASSERT_EQ(eventManager->GetSubscriberCount(), 0);
+    local_event_manager->AddHandler(general_event_handler);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 1);
+    local_event_manager->RemoveHandler(general_event_handler);
+    ASSERT_EQ(local_event_manager->get_handler_count(), 0);
 }
 
 TEST_F(EventManagerTest, RemoveSubscriberFromEmptyMapTest) {
-    ASSERT_NO_THROW(eventManager->RemoveSubscriber<GeneralEvent>(generalEventListener));
+    ASSERT_NO_THROW(local_event_manager->RemoveHandler(general_event_handler));
 }
 
 TEST_F(EventManagerTest, TriggerEventTest) {
-    eventManager->AddSubscriber(generalEventListener);
-    GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
+    local_event_manager->AddHandler(general_event_handler);
+    TestGeneralEvent general_event{};
 
-    auto castedListener = std::static_pointer_cast<GeneralEventListener>(generalEventListener);
+    auto casted_handler = std::static_pointer_cast<TestEventHandler<TestGeneralEvent>>(general_event_handler);
 
-    EXPECT_FALSE(castedListener->eventTriggered);
-    eventManager->EmitEvent(generalEvent);
-    EXPECT_TRUE(castedListener->eventTriggered);
+    EXPECT_FALSE(casted_handler->event_triggered);
+    local_event_manager->EmitEvent(general_event);
+    EXPECT_TRUE(casted_handler->event_triggered);
 }
 
 TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
-    eventManager->AddSubscriber(generalEventListener);
-    std::shared_ptr<IEventListener<SpecificEvent>> specificListener = std::make_shared<SpecificEventListener>();
-    eventManager->AddSubscriber(specificListener);
+    local_event_manager->AddHandler(general_event_handler);
+    std::shared_ptr<IEventHandler<TestSpecificEvent>> specific_event_handler = std::make_shared<TestEventHandler<TestSpecificEvent>>();
+    local_event_manager->AddHandler(specific_event_handler);
 
-    auto castedListener = std::static_pointer_cast<GeneralEventListener>(generalEventListener);
-    auto castedListener2 = std::static_pointer_cast<SpecificEventListener>(specificListener);
+    auto casted_handler = std::static_pointer_cast<TestEventHandler<TestGeneralEvent>>(general_event_handler);
+    auto casted_handler_2 = std::static_pointer_cast<TestEventHandler<TestSpecificEvent>>(specific_event_handler);
 
-    EXPECT_FALSE(castedListener->eventTriggered);
-    EXPECT_FALSE(castedListener2->eventTriggered);
+    EXPECT_FALSE(casted_handler->event_triggered);
+    EXPECT_FALSE(casted_handler_2->event_triggered);
 
-    GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
-    eventManager->EmitEvent(generalEvent);
-    EXPECT_TRUE(castedListener->eventTriggered);
-    EXPECT_FALSE(castedListener2->eventTriggered);
+    TestGeneralEvent generalEvent{};
+
+    local_event_manager->EmitEvent(generalEvent);
+    EXPECT_TRUE(casted_handler->event_triggered);
+    EXPECT_FALSE(casted_handler_2->event_triggered);
 }
 
 TEST_F(EventManagerTest, DanglingPointerTest) {
-    eventManager->AddSubscriber(generalEventListener);
-    generalEventListener.reset();
+    local_event_manager->AddHandler(general_event_handler);
+    general_event_handler.reset();
 
-    GeneralEvent generalEvent{GeneralEvent::SubType::GeneralSubType0};
-    eventManager->EmitEvent(generalEvent);
+    TestGeneralEvent generalEvent{};
+    local_event_manager->EmitEvent(generalEvent);
 
-    ASSERT_EQ(eventManager->GetSubscriberCount<GeneralEvent>(), 0);
+    ASSERT_EQ(local_event_manager->get_handler_count(EventType::GeneralEvent), 0);
 }

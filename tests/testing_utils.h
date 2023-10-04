@@ -3,68 +3,57 @@
 //
 
 #pragma once
+#include <utility>
+
 #include "base_event.h"
-#include "event_listener.h"
+#include "event_manager.h"
 
-namespace event_manager {
+namespace event_system {
 
-    class GeneralEvent : public BaseEvent {
+    class TestGeneralEvent : public BaseEvent {
     public:
-        enum class SubType {
-            GeneralSubType0,
-            GeneralSubType1,
-            GeneralSubType2
-        };
+        EVENT_CLASS_TYPE(GeneralEvent)
 
-        explicit GeneralEvent(SubType subType) : subType_(subType) {
-            eventName = "GeneralEvent";
+        explicit TestGeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+
+        [[nodiscard]] std::string get_name() const override {
+            return "General Event 1";
         }
 
-        [[nodiscard]] int GetSubType() const override {
-            return static_cast<int>(subType_);
-        }
-
-
-    private:
-        SubType subType_;
-    };
-
-    class SpecificEvent : public BaseEvent {
-    public:
-        enum class SubType {
-            SpecificSubType0,
-            SpecificSubType1,
-        };
-
-        explicit SpecificEvent(SubType subType) : subType_(subType) {
-            eventName = "SpecificEvent";
-        }
-
-        [[nodiscard]] int GetSubType() const override {
-            return static_cast<int>(subType_);
+        [[nodiscard]] std::string get_sender_id() const override {
+            return sender_id_;
         }
 
     private:
-        SubType subType_;
+        std::string sender_id_;
     };
 
-    class GeneralEventListener : public IEventListener<GeneralEvent> {
+    class TestSpecificEvent : public BaseEvent {
     public:
-        bool eventTriggered = false;
+        EVENT_CLASS_TYPE(SpecificEvent)
 
-        void OnEvent(const GeneralEvent& event) override {
-            eventTriggered = true;
-            std::cout << "Received general event: " << event.GetSubType() << std::endl;
+        explicit TestSpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+
+        [[nodiscard]] std::string get_name() const override {
+            return "Specific Event 1";
         }
+
+        [[nodiscard]] std::string get_sender_id() const override {
+            return sender_id_;
+        }
+
+    private:
+        std::string sender_id_;
     };
 
-    class SpecificEventListener : public IEventListener<SpecificEvent> {
+    template <typename TEvent>
+    class TestEventHandler : public IEventHandler<TEvent> {
     public:
-        bool eventTriggered = false;
+        bool event_triggered = false;
 
-        void OnEvent(const SpecificEvent& event) override {
-            eventTriggered = true;
-            std::cout << "Received specific event: " << event.GetSubType() << std::endl;
+    private:
+        void HandleEvent(const TEvent& event) override {
+            event_triggered = true;
         }
     };
 
