@@ -10,11 +10,11 @@
 
 namespace event_system {
 
-    class GeneralEvent : public BaseEvent {
+    class TestGeneralEvent : public BaseEvent {
     public:
         EVENT_CLASS_TYPE(GeneralEvent)
 
-        explicit GeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+        explicit TestGeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
         [[nodiscard]] std::string get_name() const override {
             return "General Event 1";
@@ -28,11 +28,11 @@ namespace event_system {
         std::string sender_id_;
     };
 
-    class SpecificEvent : public BaseEvent {
+    class TestSpecificEvent : public BaseEvent {
     public:
         EVENT_CLASS_TYPE(SpecificEvent)
 
-        explicit SpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+        explicit TestSpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
         [[nodiscard]] std::string get_name() const override {
             return "Specific Event 1";

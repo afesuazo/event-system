@@ -11,11 +11,11 @@
 
 using namespace event_system;
 
-class GeneralEvent : public BaseEvent {
+class SGeneralEvent : public BaseEvent {
 public:
     EVENT_CLASS_TYPE(GeneralEvent)
 
-    explicit GeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+    explicit SGeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
     [[nodiscard]] std::string get_name() const override {
         return "General Event 1";
@@ -29,11 +29,11 @@ private:
     std::string sender_id_;
 };
 
-class SpecificEvent : public BaseEvent {
+class SSpecificEvent : public BaseEvent {
 public:
     EVENT_CLASS_TYPE(SpecificEvent)
 
-    explicit SpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+    explicit SSpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
     [[nodiscard]] std::string get_name() const override {
         return "Specific Event 1";
@@ -47,8 +47,8 @@ private:
     std::string sender_id_;
 };
 
-class GeneralEventHandler : public IEventHandler<GeneralEvent> {
-    void HandleEvent(const GeneralEvent& event) override {
+class GeneralEventHandler : public IEventHandler<SGeneralEvent> {
+    void HandleEvent(const SGeneralEvent& event) override {
         std::cout << "General event handled\n";
     }
 };
@@ -57,13 +57,13 @@ class SampleLayer : public EventLayer {
 public:
 
     void Run() override {
-        std::shared_ptr<IEventHandler<GeneralEvent>>
+        std::shared_ptr<IEventHandler<SGeneralEvent>>
                 general_handler_1 = std::make_shared<GeneralEventHandler>();
 
         AddEventHandler(general_handler_1);
 
-        GeneralEvent general_event_1{get_layer_name()};
-        SpecificEvent specific_event_0{get_layer_name()};
+        SGeneralEvent general_event_1{get_layer_name()};
+        SSpecificEvent specific_event_0{get_layer_name()};
 
         TriggerEvent(specific_event_0); // Should not emit an event
         TriggerEvent(general_event_1);

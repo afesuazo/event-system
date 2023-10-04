@@ -9,6 +9,7 @@
 #include "testing_utils.h"
 #include <thread>
 #include <chrono>
+#include <utility>
 
 using namespace event_system;
 
@@ -20,8 +21,8 @@ public:
     void Run() override {
         std::cout << "Sample layer running\n";
 
-        std::shared_ptr<IEventHandler<GeneralEvent>>
-                general_handler = std::make_shared<TestEventHandler<GeneralEvent>>();
+        std::shared_ptr<IEventHandler<TestGeneralEvent>>
+                general_handler = std::make_shared<TestEventHandler<TestGeneralEvent>>();
 
         AddEventHandler(general_handler);
     }
@@ -35,8 +36,8 @@ public:
     void Run() override {
         std::cout << "Sample layer running\n";
 
-        std::shared_ptr<IEventHandler<GeneralEvent>>
-                general_handler = std::make_shared<TestEventHandler<GeneralEvent>>();
+        std::shared_ptr<IEventHandler<TestGeneralEvent>>
+                general_handler = std::make_shared<TestEventHandler<TestGeneralEvent>>();
 
         AddEventHandler(general_handler);
         RemoveEventHandler(general_handler);
@@ -46,7 +47,9 @@ public:
 class SpecificEventLayer : public EventLayer {
 public:
 
-    using EventLayer :: EventLayer;
+    explicit SpecificEventLayer(std::string layer_name = "") : EventLayer(std::move(layer_name)) {
+        set_allowed_events(SpecificEvent);
+    }
 
     template<typename TEvent>
     void PublicAddHandler(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
@@ -56,11 +59,6 @@ public:
     template <typename TEvent>
     void PublicTriggerEvent(const TEvent& event) {
         TriggerEvent(event);
-    }
-
-    bool IsAllowedEvent(const BaseEvent& event) override {
-        // By default, all event types are allowed
-        return typeid(event) != typeid(GeneralEvent);
     }
 
     void Run() override {}
@@ -97,29 +95,29 @@ TEST(EventLayerTest, RemovedHandlerTest) {
 TEST(EventLayerTest, ValidEventEmissionTest) {
     SpecificEventLayer event_layer{};
 
-    std::shared_ptr<IEventHandler<SpecificEvent>>
-            specific_event_handler = std::make_shared<TestEventHandler<SpecificEvent>>();
+    std::shared_ptr<IEventHandler<TestSpecificEvent>>
+            specific_event_handler = std::make_shared<TestEventHandler<TestSpecificEvent>>();
 
     event_layer.PublicAddHandler(specific_event_handler);
 
-    SpecificEvent specific_event{};
+    TestSpecificEvent specific_event{};
     event_layer.PublicTriggerEvent(specific_event);
 
-    auto casted_event_handler = std::static_pointer_cast<TestEventHandler<SpecificEvent>>(specific_event_handler);
+    auto casted_event_handler = std::static_pointer_cast<TestEventHandler<TestSpecificEvent>>(specific_event_handler);
     EXPECT_TRUE(casted_event_handler->event_triggered);
 }
 
 TEST(EventLayerTest, InvalidEventEmissionTest) {
     SpecificEventLayer event_layer{};
 
-    std::shared_ptr<IEventHandler<GeneralEvent>>
-            general_event_handler = std::make_shared<TestEventHandler<GeneralEvent>>();
+    std::shared_ptr<IEventHandler<TestGeneralEvent>>
+            general_event_handler = std::make_shared<TestEventHandler<TestGeneralEvent>>();
 
     event_layer.PublicAddHandler(general_event_handler);
 
-    GeneralEvent general_event{};
+    TestGeneralEvent general_event{};
     event_layer.PublicTriggerEvent(general_event);
 
-    auto casted_event_handler = std::static_pointer_cast<TestEventHandler<GeneralEvent>>(general_event_handler);
+    auto casted_event_handler = std::static_pointer_cast<TestEventHandler<TestGeneralEvent>>(general_event_handler);
     EXPECT_FALSE(casted_event_handler->event_triggered);
 }

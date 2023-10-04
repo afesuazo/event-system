@@ -6,7 +6,9 @@
 
 namespace event_system {
 
-    EventLayer::EventLayer(std::string layer_name) : layer_name_(std::move(layer_name)) {}
+    EventLayer::EventLayer(std::string layer_name) : layer_name_(std::move(layer_name)) {
+        allowed_events_ = ~None;
+    }
 
     void EventLayer::Stop() {
         should_stop_ = true;
@@ -40,9 +42,8 @@ namespace event_system {
         return should_stop_;
     }
 
-    bool EventLayer::IsAllowedEvent(const BaseEvent& event) {
-        // By default, all event types are allowed
-        return true;
+    bool EventLayer::IsAllowedEvent(const BaseEvent& event) const {
+        return (allowed_events_ & event.get_event_type()) != 0;
     }
 
     void EventLayer::TriggerEvent(const BaseEvent& event) {
