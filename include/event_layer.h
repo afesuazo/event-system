@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <atomic>
+#include <iostream>
 
 namespace event_system {
 
@@ -24,8 +25,8 @@ namespace event_system {
      */
     class EventLayer {
     public:
-        explicit EventLayer(std::string layer_name = "")
-                : layer_name_(std::move(layer_name)) {}
+        explicit EventLayer(std::string layer_name = "");
+
         virtual ~EventLayer() = default;
 
         /**
@@ -40,44 +41,44 @@ namespace event_system {
          * @brief Set the stop flag to true
          *
          * The stop flag can be used to terminate the Run method if running in a loop. This method
-         * is thread safe, usable when calling Run() in a separate thread.
+         * is thread safe, helpful when calling Run() in a separate thread.
          */
-        void Stop() {
-            should_stop_ = true;
-        }
+        void Stop();
 
         /**
          * @brief Propagate and event to this layer
          *
-         * This method can be called by external sources to emit an event inside this layer. The local manager is
-         * given the event in order to trigger all appropriate local handlers.
-         *
          * @param event The event to emit.
+         *
+         * This method can be called by external sources to emit an event inside this layer. The event manager is
+         * given the event in order to trigger all appropriate local handlers.
          */
-        // For events sourced from external layers
-        void OnExternalEvent(const BaseEvent& event) {
-            event_manager_.EmitEvent(event);
-        }
+        void OnExternalEvent(const BaseEvent& event);
 
-        void set_layer_manager_callback(const EventCallback& callback) {
-            layer_manager_callback_ = callback;
-        }
+        /**
+         * @brief set a callback to communicate local events to ane external source
+         */
+        void set_layer_manager_callback(const EventCallback& callback);
 
         /**
          * @brief Returns the name of the layer
          */
-        std::string get_layer_name() const {
-            return layer_name_;
-        }
+        std::string get_layer_name() const;
 
         /**
          * @brief Get the total amount of active handlers in the layer
          *
          * @returns size_t representing the total active handlers
          */
-        size_t get_handler_count() const {
-            return event_manager_.get_handler_count();
-        }
+        size_t get_handler_count() const;
+
+        /**
+         * @brief Checks if this object is allowed to emit the given event type
+         *
+         * @param event The event to check.
+         * @returns True if the event type is allowed.
+         */
+        virtual bool IsAllowedEvent(const BaseEvent& event);
 
     protected:
 
@@ -86,67 +87,33 @@ namespace event_system {
          *
          * @param handler A reference to the handler object to add.
          */
-        void AddEventHandler(const std::shared_ptr<IEventHandlerBase>& handler) {
-            event_manager_.AddHandler(handler);
-        }
+        void AddEventHandler(const std::shared_ptr<IEventHandlerBase>& handler);
 
         /**
          * @brief Removes a handler from the local event manager
          *
          * @param handler A reference to the handler object to remove.
          */
-        void RemoveEventHandler(const std::shared_ptr<IEventHandlerBase>& handler) {
-            event_manager_.RemoveHandler(handler);
-        }
-
-        // TODO: Default to all or none?
-//        void SetAllowedEvents() {
-//
-//        }
+        void RemoveEventHandler(const std::shared_ptr<IEventHandlerBase>& handler);
 
         /**
          * @brief Checks if the layer has should stop.
          *
          * @returns True if layer should stop.
          */
-        bool ShouldStop() {
-            return should_stop_;
-        }
+        bool ShouldStop();
 
         /**
-         * @brief Checks if this object is allowed to emit the given event
-         *
-         * @param event The event to check.
-         * @returns True if the event type is allowed.
-         */
-        virtual bool IsAllowedEvent(const BaseEvent& event) {
-            // By default, all event types are allowed
-            return true;
-        }
-
-        /**
-         * @brief Emit an event through the local emitter.
-         *
-         * The emitter will run appropriate checks and decide weather or not to emit the event and
-         * if the event should reach beyond this layer.
+         * @brief Emit an event within the layer
          *
          * @param event The event to emit.
+         *
+         * The layer will run appropriate checks and decide weather or not to emit the event and
+         * if the event should reach beyond this layer by using the external source callback if set.
          */
-        void TriggerEvent(const BaseEvent& event) {
-            if (!IsAllowedEvent(event)) {
-                std::cerr << "Event type not allowed.\n";
-                return;
-            }
-
-            // Emit even locally and check if there is an external callback registered
-            event_manager_.EmitEvent(event);
-            if(layer_manager_callback_){
-                layer_manager_callback_(event, layer_name_);
-            }
-        }
+        void TriggerEvent(const BaseEvent& event);
 
     private:
-        // Points to the shared event manager
         EventManager event_manager_;
         EventCallback layer_manager_callback_;  // Callback to the LayerEventManager::OnEvent method
         std::string layer_name_;

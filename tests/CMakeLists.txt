@@ -7,4 +7,12 @@ set(TEST_SOURCES
 )
 
 add_executable(runTests ${TEST_SOURCES})
-target_link_libraries(runTests GTest::GTest GTest::Main)
+
+target_link_libraries(runTests
+        PRIVATE event_system_lib
+        GTest::GTest
+        GTest::Main
+)
+target_include_directories(runTests
+        PRIVATE ${CMAKE_SOURCE_DIR}/include
+)

@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#include <utility>
+
 #include "base_event.h"
 #include "event_manager.h"
 
@@ -12,7 +14,7 @@ namespace event_system {
     public:
         EVENT_CLASS_TYPE(GeneralEvent)
 
-        explicit GeneralEvent(std::string sender_id = "") : sender_id_(sender_id) {}
+        explicit GeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
         [[nodiscard]] std::string get_name() const override {
             return "General Event 1";
@@ -30,7 +32,7 @@ namespace event_system {
     public:
         EVENT_CLASS_TYPE(SpecificEvent)
 
-        explicit SpecificEvent(std::string sender_id = "") : sender_id_(sender_id) {}
+        explicit SpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
         [[nodiscard]] std::string get_name() const override {
             return "Specific Event 1";

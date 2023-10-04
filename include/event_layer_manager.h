@@ -3,46 +3,52 @@
 //
 
 #pragma once
+
 #include "base_event.h"
 #include "event_layer.h"
 
 namespace event_system {
 
+    /**
+     * @brief Provides a method of communication between independent EventLayers in an application
+     *
+     * Provides an object to which EventLayers can be registered with. This allows information to be shared
+     * between layers through events. When an event is raised inside a layer, the EventLayerManager object is informed
+     * and the event is broadcast to all other application layers. This helps keep proper encapsulation.
+     */
     class EventLayerManager {
     public:
         EventLayerManager() = default;
+
         ~EventLayerManager() = default;
 
-        void RegisterLayer(std::shared_ptr<EventLayer>& layer) {
-            auto callback = [this](const BaseEvent& event, const std::string& sender_id) {
-                this->OnEvent(event, sender_id);
-            };
-            layer->set_layer_manager_callback(callback);
-            layers_.push_back(layer);
-        }
+        /**
+         * @brief Adds a reference to the EventLayer to the collection
+         *
+         * @param layer Pointer to the EventLayer object.
+         *
+         * Adds a reference to the EventLayer to the collection and registers a callback that enables the layer to
+         * relay triggered events to the EventLayerManager object
+         */
+        void RegisterLayer(std::shared_ptr<EventLayer>& layer);
 
-        void RemoveLayer(std::shared_ptr<EventLayer> layer) {
-            layers_.erase(std::remove_if(layers_.begin(), layers_.end(),
-                                         [&layer](const std::weak_ptr<EventLayer>& layer_reference) {
-                                             auto shared_layer_reference = layer_reference.lock();
-                                             return shared_layer_reference && shared_layer_reference == layer;
-                                         }), layers_.end());
-        }
+        /**
+         * @brief Removes the reference to the EventLayer stored in the collection
+         *
+         * @param layer Pointer to the EventLayer object.
+         */
+        void RemoveLayer(std::shared_ptr<EventLayer> layer);
 
-        void OnEvent(const BaseEvent& event, const std::string& sender_id) {
-            for (auto it = layers_.begin(); it != layers_.end();) {
-                if (auto layer = it->lock()) {
-                    // Avoid sending the event back to the sender layer
-                    if (layer->get_layer_name() != sender_id) {
-                        layer->OnExternalEvent(event);
-                    }
-                    ++it;
-                } else {
-                    // Remove the layer if it no longer exists
-                    it = layers_.erase(it);
-                }
-            }
-        }
+        /**
+         * @brief Relays an incoming event to all layers except the sender
+         *
+         * @param event Event that was triggered by a layer.
+         * @param sender_id String representing the name of the layer that emitted the event.
+         *
+         *  Called by a layer when an event has to be broadcast to the entire application. This method relays said event
+         *  to all registered layers except for the sending layer.
+         */
+        void OnEvent(const BaseEvent& event, const std::string& sender_id);
 
     private:
         std::vector<std::weak_ptr<EventLayer>> layers_;

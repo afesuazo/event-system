@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include <string>
 
 namespace event_system {
@@ -31,7 +32,9 @@ namespace event_system {
         virtual ~BaseEvent() = default;
 
         [[nodiscard]] virtual EventType get_event_type() const = 0;
+
         [[nodiscard]] virtual std::string get_name() const = 0;
+
         [[nodiscard]] virtual std::string get_sender_id() const = 0;
     };
 
