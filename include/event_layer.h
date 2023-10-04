@@ -6,12 +6,10 @@
 
 #include "base_event.h"
 #include "event_manager.h"
+#include "event_handler.h"
 #include <memory>
 #include <string>
-#include <mutex>
-#include <string>
 #include <atomic>
-#include "event_handler.h"
 
 namespace event_system {
 

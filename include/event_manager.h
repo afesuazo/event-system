@@ -5,13 +5,10 @@
 #define ENABLE_SAFETY_CHECKS
 
 #pragma once
-#include <unordered_map>
-#include "algorithm"
-#include <typeindex>
-#include <memory>
-#include <iostream>
 #include "event_handler.h"
-#include <string>
+#include <unordered_map>
+#include <algorithm>
+#include <memory>
 
 namespace event_system {
 

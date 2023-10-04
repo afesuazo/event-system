@@ -5,7 +5,6 @@
 #pragma once
 #include "base_event.h"
 #include "event_layer.h"
-#include <functional>
 
 namespace event_system {
 
