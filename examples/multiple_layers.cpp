@@ -50,7 +50,7 @@ public:
         MGeneralEvent general_event_1{get_layer_name()};
         TriggerEvent(general_event_1);
 
-        while (!ShouldStop()){
+        while (!ShouldStop()) {
 
         }
     }
@@ -68,7 +68,7 @@ public:
 
         AddEventHandler(general_handler_1);
 
-        while (!ShouldStop()){
+        while (!ShouldStop()) {
 
         }
     }

@@ -6,8 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 set(EVENT_MANAGER_SOURCES
-        src/single_layer.cpp
-        src/multiple_layers.cpp
+        src/event_layer.cpp
+        src/event_manager.cpp
+        src/event_layer_manager.cpp
+        examples/single_layer.cpp
+        examples/multiple_layers.cpp
 )
 
 add_executable(event_system ${EVENT_MANAGER_SOURCES})

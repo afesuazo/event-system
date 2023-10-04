@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include "base_event.h"
 
 namespace event_system {
@@ -19,7 +20,9 @@ namespace event_system {
     class IEventHandlerBase {
     public:
         virtual ~IEventHandlerBase() = default;
+
         virtual void OnEvent(const BaseEvent& event) = 0;
+
         [[nodiscard]] virtual EventType GetHandledEventType() const = 0;
 
     };
@@ -30,7 +33,7 @@ namespace event_system {
      *
      * @tparam TEvent The event type this handler is intended to subscribe to
      */
-    template <typename TEvent>
+    template<typename TEvent>
     class IEventHandler : public IEventHandlerBase {
     public:
 
