@@ -39,7 +39,7 @@ namespace event_system {
 #endif
     }
 
-    void EventManager::EmitEvent(const event_system::BaseEvent& event) {
+    void EventManager::OnEvent(const event_system::BaseEvent& event) {
         // Without this check, an empty vector would be created, and we would loop over an empty container
         auto it = subscribers_.find(event.get_event_type());
         if (it == subscribers_.end()) { return; }

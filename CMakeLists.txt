@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(event_system_lib
         src/event_manager.cpp
         src/event_layer.cpp
-        src/event_layer_manager.cpp
 )
 
 target_include_directories(event_system_lib
@@ -14,7 +13,7 @@ target_include_directories(event_system_lib
 )
 
 set(EVENT_SYSTEM_EXAMPLES
-        examples/single_layer.cpp
+        examples/no_layer.cpp
         examples/multiple_layers.cpp
 )
 

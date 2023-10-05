@@ -13,111 +13,59 @@
 
 using namespace event_system;
 
-class AddEventLayer : public EventLayer {
+class TestExternalManager {
 public:
+    bool event_triggered = false;
 
-    using EventLayer :: EventLayer;
-
-    void Run() override {
-        std::cout << "Sample layer running\n";
-
-        std::shared_ptr<IEventHandler<TestGeneralEvent>>
-                general_handler = std::make_shared<TestEventHandler<TestGeneralEvent>>();
-
-        AddEventHandler(general_handler);
+    void OnEvent(const event_system::BaseEvent& event) {
+        event_triggered = true;
     }
+
 };
 
-class RemoveEventLayer : public EventLayer {
-public:
-
-    using EventLayer :: EventLayer;
-
-    void Run() override {
-        std::cout << "Sample layer running\n";
-
-        std::shared_ptr<IEventHandler<TestGeneralEvent>>
-                general_handler = std::make_shared<TestEventHandler<TestGeneralEvent>>();
-
-        AddEventHandler(general_handler);
-        RemoveEventHandler(general_handler);
-    }
-};
-
-class SpecificEventLayer : public EventLayer {
+class SpecificEventLayer : public EventLayer, public IEventHandler<TestSpecificEvent> {
 public:
 
     explicit SpecificEventLayer(std::string layer_name = "") : EventLayer(std::move(layer_name)) {
         set_allowed_events(SpecificEvent);
     }
 
-    template<typename TEvent>
-    void PublicAddHandler(const std::shared_ptr<IEventHandler<TEvent>>& event_handler) {
-        AddEventHandler(event_handler);
+    void HandleEvent(const TestSpecificEvent& event) override {
+        std::cout << "Specific event handled in layer: " << event.get_sender_id() << "\n";
     }
 
     template <typename TEvent>
     void PublicTriggerEvent(const TEvent& event) {
-        TriggerEvent(event);
+        EmitEvent(event);
     }
 
     void Run() override {}
 };
 
-TEST(EventLayerTest, AddedHandlerTest) {
-    AddEventLayer event_layer{};
 
-    // Start Run in a separate thread
-    std::thread run_thread(&EventLayer::Run, &event_layer);
-    // Give time to set handlers
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+class EventLayerTest : public ::testing::Test {
+protected:
+    TestExternalManager test_external_manager;
+    SpecificEventLayer event_layer;
 
-    EXPECT_EQ(event_layer.get_handler_count(), 1);
+    void SetUp() override {
+        event_layer.set_layer_manager_callback([this](const BaseEvent& event){
+            test_external_manager.OnEvent(event);
+        });
+    }
+};
 
-    event_layer.Stop();
-    run_thread.join();
-}
 
-TEST(EventLayerTest, RemovedHandlerTest) {
-    RemoveEventLayer event_layer{};
-
-    // Start Run in a separate thread
-    std::thread run_thread(&EventLayer::Run, &event_layer);
-    // Give time to set handlers
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-    EXPECT_EQ(event_layer.get_handler_count(), 0);
-
-    event_layer.Stop();
-    run_thread.join();
-}
-
-TEST(EventLayerTest, ValidEventEmissionTest) {
-    SpecificEventLayer event_layer{};
-
-    std::shared_ptr<IEventHandler<TestSpecificEvent>>
-            specific_event_handler = std::make_shared<TestEventHandler<TestSpecificEvent>>();
-
-    event_layer.PublicAddHandler(specific_event_handler);
-
+TEST_F(EventLayerTest, ValidEventEmissionTest) {
     TestSpecificEvent specific_event{};
     event_layer.PublicTriggerEvent(specific_event);
 
-    auto casted_event_handler = std::static_pointer_cast<TestEventHandler<TestSpecificEvent>>(specific_event_handler);
-    EXPECT_TRUE(casted_event_handler->event_triggered);
+    EXPECT_TRUE(test_external_manager.event_triggered);
 }
 
-TEST(EventLayerTest, InvalidEventEmissionTest) {
-    SpecificEventLayer event_layer{};
-
-    std::shared_ptr<IEventHandler<TestGeneralEvent>>
-            general_event_handler = std::make_shared<TestEventHandler<TestGeneralEvent>>();
-
-    event_layer.PublicAddHandler(general_event_handler);
-
+TEST_F(EventLayerTest, InvalidEventEmissionTest) {
     TestGeneralEvent general_event{};
     event_layer.PublicTriggerEvent(general_event);
 
-    auto casted_event_handler = std::static_pointer_cast<TestEventHandler<TestGeneralEvent>>(general_event_handler);
-    EXPECT_FALSE(casted_event_handler->event_triggered);
+    EXPECT_FALSE(test_external_manager.event_triggered);
 }
