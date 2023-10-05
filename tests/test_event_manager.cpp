@@ -59,7 +59,7 @@ TEST_F(EventManagerTest, TriggerEventTest) {
     auto casted_handler = std::static_pointer_cast<TestEventHandler<TestGeneralEvent>>(general_event_handler);
 
     EXPECT_FALSE(casted_handler->event_triggered);
-    local_event_manager->EmitEvent(general_event);
+    local_event_manager->OnEvent(general_event);
     EXPECT_TRUE(casted_handler->event_triggered);
 }
 
@@ -76,7 +76,7 @@ TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
 
     TestGeneralEvent generalEvent{};
 
-    local_event_manager->EmitEvent(generalEvent);
+    local_event_manager->OnEvent(generalEvent);
     EXPECT_TRUE(casted_handler->event_triggered);
     EXPECT_FALSE(casted_handler_2->event_triggered);
 }
@@ -86,7 +86,7 @@ TEST_F(EventManagerTest, DanglingPointerTest) {
     general_event_handler.reset();
 
     TestGeneralEvent generalEvent{};
-    local_event_manager->EmitEvent(generalEvent);
+    local_event_manager->OnEvent(generalEvent);
 
     ASSERT_EQ(local_event_manager->get_handler_count(EventType::GeneralEvent), 0);
 }

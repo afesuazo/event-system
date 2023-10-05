@@ -46,9 +46,11 @@ namespace event_system {
          * @param event The event that was triggered.
          */
         void OnEvent(const BaseEvent& event) override {
+            // TODO: Check performance of the runtime check
             // This function acts as the controlled, type-safe wrapper
-            // Will cause undefined behavior if event is not of type TEvent
-            HandleEvent(static_cast<const TEvent&>(event));
+            if (event.get_event_type() == TEvent::get_static_type()) {
+                HandleEvent(static_cast<const TEvent&>(event));
+            }
         }
 
         [[nodiscard]] EventType GetHandledEventType() const override {

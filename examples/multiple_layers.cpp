@@ -5,7 +5,7 @@
 #include <iostream>
 #include "event_layer.h"
 #include "event_handler.h"
-#include "event_layer_manager.h"
+#include "event_manager.h"
 #include "base_event.h"
 #include <thread>
 #include <utility>
@@ -30,25 +30,18 @@ private:
     std::string sender_id_;
 };
 
-class MGeneralEventHandler : public IEventHandler<MGeneralEvent> {
-    void HandleEvent(const MGeneralEvent& event) override {
-        std::cout << "General event handled from layer: " << event.get_sender_id() << "\n";
-    }
-};
-
-class MSampleLayer : public EventLayer {
+class MSampleLayer : public EventLayer, public IEventHandler<MGeneralEvent> {
 public:
 
     using EventLayer::EventLayer;
 
+    void HandleEvent(const MGeneralEvent& event) override {
+        std::cout << "General event handled from layer: " << event.get_sender_id() << "\n";
+    }
+
     void Run() override {
-        std::shared_ptr<IEventHandler<MGeneralEvent>>
-                general_handler_1 = std::make_shared<MGeneralEventHandler>();
-
-        AddEventHandler(general_handler_1);
-
         MGeneralEvent general_event_1{get_layer_name()};
-        TriggerEvent(general_event_1);
+        EmitEvent(general_event_1);
 
         while (!ShouldStop()) {
 
@@ -57,17 +50,16 @@ public:
 
 };
 
-class MSampleLayer2 : public EventLayer {
+class MSampleLayer2 : public EventLayer, public IEventHandler<MGeneralEvent> {
 public:
 
     using EventLayer::EventLayer;
 
+    void HandleEvent(const MGeneralEvent& event) override {
+        std::cout << "General event handled from layer: " << event.get_sender_id() << "\n";
+    }
+
     void Run() override {
-        std::shared_ptr<IEventHandler<MGeneralEvent>>
-                general_handler_1 = std::make_shared<MGeneralEventHandler>();
-
-        AddEventHandler(general_handler_1);
-
         while (!ShouldStop()) {
 
         }
@@ -79,14 +71,18 @@ int main() {
 
     std::cout << "** Multiple Layer Event System Example **\n\n";
 
-    EventLayerManager layer_manager{};
+    EventManager event_manager{};
+
+    auto callback = [&event_manager](const BaseEvent& event) {
+        event_manager.OnEvent(event);
+    };
 
     // Set application layers
-    std::shared_ptr<EventLayer> layer_1 = std::make_shared<MSampleLayer>("layer_1");
-    std::shared_ptr<EventLayer> layer_2 = std::make_shared<MSampleLayer2>("layer_2");
+    std::shared_ptr<MSampleLayer> layer_1 = std::make_shared<MSampleLayer>("layer_1", callback);
+    std::shared_ptr<MSampleLayer2> layer_2 = std::make_shared<MSampleLayer2>("layer_2", callback);
 
-    layer_manager.RegisterLayer(layer_1);
-    layer_manager.RegisterLayer(layer_2);
+    event_manager.AddHandler(layer_1);
+    event_manager.AddHandler(layer_2);
 
     // Run each layer
     std::thread run_layer_1(&EventLayer::Run, layer_1);
@@ -99,4 +95,6 @@ int main() {
     layer_2->Stop();
     run_layer_1.join();
     run_layer_2.join();
+
+    return 0;
 }

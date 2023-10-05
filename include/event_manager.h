@@ -14,7 +14,7 @@
 namespace event_system {
 
     /**
-    * @brief Provides a method of communication between independent components through events
+    * @brief Provides a method of communication between independent application segments through events
     *
     * Provides an object to which EventHandlers can subscribe to. When needed, the EventManager
     * can trigger an event which will get relayed to all objects subscribed to said event. This class
@@ -58,7 +58,7 @@ namespace event_system {
          *
          * Informs all registered handlers for the given event type that the event has been triggered.
          */
-        void EmitEvent(const BaseEvent& event);
+        void OnEvent(const event_system::BaseEvent& event);
 
         /**
          * @brief Checks if an IEventHandler subscription exists.
