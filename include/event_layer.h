@@ -5,7 +5,6 @@
 #pragma once
 
 #include "base_event.h"
-#include "event_manager.h"
 #include <memory>
 #include <string>
 #include <atomic>
