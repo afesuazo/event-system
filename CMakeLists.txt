@@ -3,13 +3,15 @@ project(event_system)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(event_system_lib
+set(EVENT_SYSTEM_SOURCES
         src/event_manager.cpp
         src/event_layer.cpp
 )
 
+add_library(event_system_lib ${EVENT_SYSTEM_SOURCES})
+
 target_include_directories(event_system_lib
-        PRIVATE ${CMAKE_SOURCE_DIR}/include
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 set(EVENT_SYSTEM_EXAMPLES
@@ -19,13 +21,17 @@ set(EVENT_SYSTEM_EXAMPLES
 
 add_executable(event_system ${EVENT_SYSTEM_EXAMPLES})
 
+target_include_directories(event_system_lib
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 target_link_libraries(event_system
         PRIVATE event_system_lib
 )
 
 target_include_directories(event_system
-        PRIVATE ${CMAKE_SOURCE_DIR}/include
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 enable_testing()
-add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
