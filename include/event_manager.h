@@ -58,7 +58,7 @@ namespace event_system {
          *
          * Informs all registered handlers for the given event type that the event has been triggered.
          */
-        void EmitEvent(const event_system::BaseEvent& event, const std::string& sender_id);
+        void OnEvent(const event_system::BaseEvent& event);
 
         /**
          * @brief Checks if an IEventHandler subscription exists.

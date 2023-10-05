@@ -12,7 +12,7 @@
 
 namespace event_system {
 
-    using EventCallback = std::function<void(const BaseEvent& event, std::string sender_id)>;
+    using EventCallback = std::function<void(const BaseEvent& event)>;
 
     /**
      * @class EventLayer
@@ -24,7 +24,7 @@ namespace event_system {
      */
     class EventLayer {
     public:
-        explicit EventLayer(std::string layer_name = "");
+        explicit EventLayer(std::string layer_name = "", const EventCallback& callback = nullptr);
 
         virtual ~EventLayer() = default;
 
@@ -85,13 +85,13 @@ namespace event_system {
          *
          * @param event The event to emit.
          *
-         * The layer will run appropriate checks and decide weather or not to emit the event and
-         * if the event should reach beyond this layer by using the external source callback if set.
+         * The layer will run appropriate checks and decide weather or not to emit
+         * using the external source callback if set.
          */
-        void TriggerEvent(const BaseEvent& event);
+        void EmitEvent(const BaseEvent& event);
 
     private:
-        EventCallback layer_manager_callback_;  // Callback to the LayerEventManager::OnEvent method
+        EventCallback manager_callback_;  // Callback to the EventManager::OnEvent method
         std::string layer_name_;
         std::atomic<bool> should_stop_;
         int allowed_events_;

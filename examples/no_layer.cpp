@@ -5,6 +5,7 @@
 #include "base_event.h"
 #include "event_layer.h"
 #include "event_handler.h"
+#include "event_manager.h"
 #include <string>
 #include <iostream>
 #include <utility>
@@ -47,37 +48,33 @@ private:
     std::string sender_id_;
 };
 
-class GeneralEventHandler : public IEventHandler<SGeneralEvent> {
+class SGeneralEventHandler : public IEventHandler<SGeneralEvent> {
     void HandleEvent(const SGeneralEvent& event) override {
         std::cout << "General event handled\n";
     }
 };
 
-class SampleLayer : public EventLayer {
-public:
-
-    void Run() override {
-        std::shared_ptr<IEventHandler<SGeneralEvent>>
-                general_handler_1 = std::make_shared<GeneralEventHandler>();
-
-        AddEventHandler(general_handler_1);
-
-        SGeneralEvent general_event_1{get_layer_name()};
-        SSpecificEvent specific_event_0{get_layer_name()};
-
-        TriggerEvent(specific_event_0); // Should not emit an event
-        TriggerEvent(general_event_1);
+class SGeneralEventHandler2 : public IEventHandler<SGeneralEvent> {
+    void HandleEvent(const SGeneralEvent& event) override {
+        std::cout << "General event handled from second handler\n";
     }
-
 };
 
-int single_layer_driver() {
 
-    std::cout << "** Single Layer Event System Example **\n\n";
+int main_disabled() {
 
-    // Set application layers
-    SampleLayer sample_layer{};
-    sample_layer.Run();
+    std::cout << "** No Layer Event System Example **\n\n";
+
+    EventManager event_manager{};
+
+    std::shared_ptr<SGeneralEventHandler> handler_1 = std::make_shared<SGeneralEventHandler>();
+    std::shared_ptr<SGeneralEventHandler2> handler_2 = std::make_shared<SGeneralEventHandler2>();
+
+    event_manager.AddHandler(handler_1);
+    event_manager.AddHandler(handler_2);
+
+    SGeneralEvent general_event_1{};
+    event_manager.OnEvent(general_event_1);
 
     return 0;
 }
