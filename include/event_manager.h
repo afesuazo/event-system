@@ -2,8 +2,6 @@
 // Created by Andres Suazo
 //
 
-#define ENABLE_SAFETY_CHECKS
-
 #pragma once
 
 #include "event_handler.h"
@@ -13,23 +11,35 @@
 
 namespace event_system {
 
+    using ref = std::reference_wrapper<const std::type_info>;
+
+
+    struct hash {
+        auto operator()(ref code) const
+        { return code.get().hash_code(); }
+    };
+
+    struct equality {
+        auto operator()(ref lhs, ref rhs) const
+        { return lhs.get() == rhs.get(); }
+    };
+
     /**
     * @brief Provides a method of communication between independent application segments through events
     *
-    * Provides an object to which EventHandlers can subscribe to. When needed, the EventManager
+    * Provides an object to which EventHandlers can subscribe to. When needed, the EventDispatcher
     * can trigger an event which will get relayed to all objects subscribed to said event. This class
     * allows easy communication between independent components in a program
     */
-    class EventManager {
+    class EventDispatcher {
         // Using weak_ptr to be able to confirm the existence of the object before use
-        using HandlerSharedPtr = std::shared_ptr<IEventHandlerBase>;
-        using HandlerWeakPtr = std::weak_ptr<IEventHandlerBase>;
-        using EventHandlerMap = std::unordered_map<EventType, std::vector<HandlerWeakPtr>>;
+        using HandlerUniquerPtr = std::shared_ptr<IEventHandler>;
+        using EventDispatcherMap = std::unordered_map<std::reference_wrapper<const std::type_info>, HandlerUniquerPtr, hash, equality>;
 
     public:
-        EventManager() = default;
+        EventDispatcher() = default;
 
-        ~EventManager() = default;
+        ~EventDispatcher() = default;
 
         /**
          * @brief Add a IEventHandler to the event subscriber list.
@@ -39,7 +49,11 @@ namespace event_system {
          * Adds a IEventHandler to the subscriber collection tied to the event type. If the event type has not been
          * previously registered, it will be registered with the given event_handler as its only subscriber.
          */
-        void AddHandler(const HandlerSharedPtr& event_handler);
+        template<typename TEvent>
+        int Subscribe(Callback<TEvent> callback) {
+            int callback_id = GetDispatcher<TEvent>()->Subscribe(callback);
+            return callback_id;
+        }
 
         /**
          * @brief Removes a IEventHandler from an events subscriber list.
@@ -49,42 +63,54 @@ namespace event_system {
          * Removes a IEventHandler from the subscriber collection tied to the event type. If there are no handlers left
          * after removing the event_handler, the event type will be removed from the map
          */
-        void RemoveHandler(const HandlerSharedPtr& event_handler);
+        template<typename TEvent>
+        void Unsubscribe(int callback_id) {
+            GetDispatcher<TEvent>()->Unsubscribe(callback_id);
+        }
+
+        template<typename TEvent>
+        void UnsubscribeAll() {
+            auto eventType = TEvent::get_static_type();
+            handlers_.erase(eventType);
+        }
 
         /**
-         * @brief Triggers and event.
+         * @brief Triggers an event.
          *
          * @param event Reference to the event object to trigger.
          *
          * Informs all registered handlers for the given event type that the event has been triggered.
          */
-        void OnEvent(const event_system::BaseEvent& event);
-
-        /**
-         * @brief Checks if an IEventHandler subscription exists.
-         *
-         * @param handler Pointer to handler object in question.
-         * @return True if the handler is registered for its event type
-         */
-        [[nodiscard]] bool HandlerExists(const HandlerSharedPtr& handler) const;
+        template <typename TEvent>
+        void Dispatch(const TEvent& event) {
+            static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be derive from BaseEvent");
+            GetDispatcher<TEvent>()->OnEvent(event);
+        }
 
         /**
           * @brief Returns the total amount of event handlers registered
           *
           * @return size_t representing the number of handlers registered
           */
-        [[nodiscard]] size_t get_handler_count() const;
+        [[nodiscard]] size_t GetHandlerCount() const {
+            return handlers_.size();
+        }
 
+    private:
         /**
-          * @brief Returns the total amount of event handlers registered to a specific event
-          *
-          * @return size_t representing the number of handlers registered
-          */
-        [[nodiscard]] size_t get_handler_count(EventType event_type) const;
-
-    protected:
-        //TODO: Compare performance to list
-        EventHandlerMap subscribers_;
+         * Returns a pointer to the specific dispatcher for the event type.
+         * A specific dispatcher is first created if one does not exist.
+         */
+        template<typename TEvent>
+        std::shared_ptr<EventHandler<TEvent>> GetDispatcher() {
+            auto& specific_handler = handlers_[typeid(TEvent)];
+            if (!specific_handler) {
+                specific_handler.reset(new EventHandler<TEvent>());
+            }
+            return std::static_pointer_cast<EventHandler<TEvent>>(specific_handler);
+        }
+    private:
+        EventDispatcherMap handlers_;
     };
 
 }
