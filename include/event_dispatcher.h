@@ -8,20 +8,9 @@
 #include <unordered_map>
 #include <algorithm>
 #include <memory>
+#include <typeindex>
 
 namespace event_system {
-
-    using ref = std::reference_wrapper<const std::type_info>;
-
-    struct hash {
-        auto operator()(ref code) const
-        { return code.get().hash_code(); }
-    };
-
-    struct equality {
-        auto operator()(ref lhs, ref rhs) const
-        { return lhs.get() == rhs.get(); }
-    };
 
     /**
      * @brief Provides a method of communication between independent application components through events
@@ -33,7 +22,7 @@ namespace event_system {
      */
     class EventDispatcher {
         using HandlerSharedPtr = std::shared_ptr<IEventHandler>;
-        using EventDispatcherMap = std::unordered_map<std::reference_wrapper<const std::type_info>, HandlerSharedPtr, hash, equality>;
+        using EventDispatcherMap = std::unordered_map<std::type_index, HandlerSharedPtr>;
 
     public:
         EventDispatcher() = default;
