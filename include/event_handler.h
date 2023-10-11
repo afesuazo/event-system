@@ -29,51 +29,55 @@ namespace event_system {
     };
 
     /**
-     * @class IEventHandler
+     * @class EventHandler
      * @brief Templated class for creating a handler of a specific event type
      *
-     * @tparam TEvent The event type this handler is intended to subscribe to
+     * @tparam TEvent The event type this handler is intended to listen for
      */
     template<typename TEvent>
     class EventHandler : public IEventHandler {
         static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be derive from BaseEvent");
     public:
         /**
-         * @brief Overridden method to handle type-erasure. Will immediately try to call the HandleEvent method.
-         *
-         * Statically casts the event reference to the expected event type (TEvent). If types match,
-         * a virtual HandleEvent function for that event type is called.
+         * @brief Iterates through all registered callbacks, passing the event as an argument to each one.
          *
          * @param event The event that was triggered.
          */
         void OnEvent(const TEvent& event) {
-            for (auto const& callback: callbacks) {
+            for (auto const& callback: callbacks_) {
                 callback(event);
             }
         }
 
-        int Subscribe(const Callback<TEvent>& callback)
-        {
-            callbacks.push_back(callback);
+        /**
+         * @brief Register a callback.
+         *
+         * @param callback Function to be called when an event is received.
+         */
+        int Register(const Callback<TEvent> callback) {
+            callbacks_.push_back(callback);
             // TODO: Generate a unique id for each callback
-            return callbacks.size() - 1;
+            return callbacks_.size() - 1;
         }
 
-        void Unsubscribe(int id)
-        {
+        /**
+         * @brief Deregister a callback.
+         *
+         * @param callback_id Index of the callback to deregister.
+         */
+        void Deregister(int callback_id) {
             // TODO: Replace with a map and generate unique ids for each callback
             // Replaces callback with an empty version in order to keep all IDs valid
-            if (id >= callbacks.size()) {return;}
-            callbacks[id] = [](const TEvent&){};
+            if (callback_id >= callbacks_.size()) { return; }
+            callbacks_[callback_id] = [](const TEvent&) {};
         }
 
         [[nodiscard]] EventType GetHandledEventType() const override {
-            return TEvent::get_static_type();
+            return TEvent::GetStaticType();
         }
 
     private:
-        std::vector<Callback<TEvent>> callbacks;
-
+        std::vector<Callback<TEvent>> callbacks_;
     };
 
 }

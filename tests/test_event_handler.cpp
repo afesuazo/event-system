@@ -22,7 +22,7 @@ TEST_F(EventHandlerTest, DerivedOnEventTriggeredTest) {
     general_event_handler->OnEvent(general_event);
     EXPECT_FALSE(event_triggered);
     auto callback = [this](const TestGeneralEvent& event){event_triggered = true;};
-    general_event_handler->Subscribe(callback);
+    general_event_handler->Register(callback);
     general_event_handler->OnEvent(general_event);
     EXPECT_TRUE(event_triggered);
 }
@@ -31,7 +31,7 @@ TEST_F(EventHandlerTest, DISABLED_ProperEventTypeTest) {
 //    TestSpecificEvent specificEvent{};
 //    general_event_handler->OnEvent(specificEvent);
 //    auto callback = [this](const TestSpecificEvent& event){event_triggered = true;};
-//    general_event_handler->Subscribe(callback);
+//    general_event_handler->Register(callback);
 //    general_event_handler->OnEvent(TestGeneralEvent{});
 //    EXPECT_FALSE(event_triggered);
 }

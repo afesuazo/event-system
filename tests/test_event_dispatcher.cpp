@@ -3,14 +3,14 @@
 //
 
 #include "gtest/gtest.h"
-#include "event_manager.h"
+#include "event_dispatcher.h"
 #include "base_event.h"
 #include "testing_utils.h"
 #include <memory>
 
 using namespace event_system;
 
-class EventManagerTest : public ::testing::Test {
+class EventDispatcherTest : public ::testing::Test {
 protected:
     std::shared_ptr<EventDispatcher> local_event_dispatcher;
     bool general_event_triggered = false;
@@ -21,62 +21,61 @@ protected:
     }
 };
 
-TEST_F(EventManagerTest, SubscribeTest) {
+TEST_F(EventDispatcherTest, SubscribeTest) {
     auto callback = [](const TestGeneralEvent& event){};
-    local_event_dispatcher->Subscribe<TestGeneralEvent>(callback);
+    local_event_dispatcher->Register<TestGeneralEvent>(callback);
     ASSERT_TRUE(local_event_dispatcher->GetHandlerCount() == 1);
 }
 
-TEST_F(EventManagerTest, AddDuplicateSubscriberTest) {
+TEST_F(EventDispatcherTest, AddDuplicateSubscriberTest) {
     ASSERT_EQ(local_event_dispatcher->GetHandlerCount(), 0);
     auto callback = [](const TestGeneralEvent& event){};
-    local_event_dispatcher->Subscribe<TestGeneralEvent>(callback);
-    local_event_dispatcher->Subscribe<TestGeneralEvent>(callback);
+    local_event_dispatcher->Register<TestGeneralEvent>(callback);
+    local_event_dispatcher->Register<TestGeneralEvent>(callback);
     ASSERT_EQ(local_event_dispatcher->GetHandlerCount(), 1);
 }
 
-TEST_F(EventManagerTest, MultipleSubscriberTest) {
+TEST_F(EventDispatcherTest, MultipleSubscriberTest) {
     auto general_callback = [](const TestGeneralEvent& event){};
     auto specific_callback = [](const TestSpecificEvent& event){};
 
-    local_event_dispatcher->Subscribe<TestGeneralEvent>(general_callback);
-    local_event_dispatcher->Subscribe<TestSpecificEvent>(specific_callback);
+    local_event_dispatcher->Register<TestGeneralEvent>(general_callback);
+    local_event_dispatcher->Register<TestSpecificEvent>(specific_callback);
 
     ASSERT_EQ(local_event_dispatcher->GetHandlerCount(), 2);
-    // TODO: Check proper count for each handler
 }
 
-TEST_F(EventManagerTest, RemoveSubscriberTest) {
+TEST_F(EventDispatcherTest, RemoveSubscriberTest) {
     auto general_callback = [this](const TestGeneralEvent& event){general_event_triggered = true;};
-    int callback_id = local_event_dispatcher->Subscribe<TestGeneralEvent>(general_callback);
+    int callback_id = local_event_dispatcher->Register<TestGeneralEvent>(general_callback);
     ASSERT_EQ(local_event_dispatcher->GetHandlerCount(), 1);
     local_event_dispatcher->Dispatch(TestGeneralEvent{});
     EXPECT_TRUE(general_event_triggered);
     general_event_triggered = false;
-    local_event_dispatcher->Unsubscribe<TestGeneralEvent>(callback_id);
+    local_event_dispatcher->Deregister<TestGeneralEvent>(callback_id);
     local_event_dispatcher->Dispatch(TestGeneralEvent{});
     EXPECT_FALSE(general_event_triggered);
 }
 
-TEST_F(EventManagerTest, RemoveSubscriberFromEmptyMapTest) {
-    ASSERT_NO_THROW(local_event_dispatcher->Unsubscribe<TestGeneralEvent>(4));
+TEST_F(EventDispatcherTest, RemoveSubscriberFromEmptyMapTest) {
+    ASSERT_NO_THROW(local_event_dispatcher->Deregister<TestGeneralEvent>(4));
 }
 
-TEST_F(EventManagerTest, TriggerEventTest) {
+TEST_F(EventDispatcherTest, TriggerEventTest) {
     auto callback = [this](const TestGeneralEvent& event){general_event_triggered = true;};
-    local_event_dispatcher->Subscribe<TestGeneralEvent>(callback);
+    local_event_dispatcher->Register<TestGeneralEvent>(callback);
     EXPECT_FALSE(general_event_triggered);
     TestGeneralEvent general_event{};
     local_event_dispatcher->Dispatch(general_event);
     EXPECT_TRUE(general_event_triggered);
 }
 
-TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
+TEST_F(EventDispatcherTest, TriggerEventMultipleSubscriberTest) {
     auto general_callback = [this](const TestGeneralEvent& event){general_event_triggered = true;};
     auto specific_callback = [this](const TestSpecificEvent& event){specific_event_triggered = true;};
 
-    local_event_dispatcher->Subscribe<TestGeneralEvent>(general_callback);
-    local_event_dispatcher->Subscribe<TestSpecificEvent>(specific_callback);
+    local_event_dispatcher->Register<TestGeneralEvent>(general_callback);
+    local_event_dispatcher->Register<TestSpecificEvent>(specific_callback);
 
     EXPECT_FALSE(general_event_triggered);
     EXPECT_FALSE(specific_event_triggered);
@@ -86,4 +85,20 @@ TEST_F(EventManagerTest, TriggerEventMultipleSubscriberTest) {
 
     EXPECT_TRUE(general_event_triggered);
     EXPECT_FALSE(specific_event_triggered);
+}
+
+TEST_F(EventDispatcherTest, UnsubscribeAllCallbacksTest) {
+    auto general_callback = [this](const TestGeneralEvent& event){};
+    auto specific_callback = [this](const TestSpecificEvent& event){};
+
+    local_event_dispatcher->Register<TestGeneralEvent>(general_callback);
+    local_event_dispatcher->Register<TestSpecificEvent>(specific_callback);
+
+    ASSERT_EQ(local_event_dispatcher->GetHandlerCount(), 2);
+    local_event_dispatcher->DeregisterAll<TestGeneralEvent>();
+    ASSERT_EQ(local_event_dispatcher->GetHandlerCount(), 1);
+
+    // Test removing an event that does not exist
+    ASSERT_NO_THROW(local_event_dispatcher->DeregisterAll<TestGeneralEvent>());
+
 }

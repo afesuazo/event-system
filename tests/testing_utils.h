@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "base_event.h"
-#include "event_manager.h"
+#include "event_dispatcher.h"
 
 namespace event_system {
 
@@ -16,11 +16,11 @@ namespace event_system {
 
         explicit TestGeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
-        [[nodiscard]] std::string get_name() const override {
+        [[nodiscard]] std::string GetName() const override {
             return "General Event 1";
         }
 
-        [[nodiscard]] std::string get_sender_id() const override {
+        [[nodiscard]] std::string GetSenderID() const override {
             return sender_id_;
         }
 
@@ -34,11 +34,11 @@ namespace event_system {
 
         explicit TestSpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
-        [[nodiscard]] std::string get_name() const override {
+        [[nodiscard]] std::string GetName() const override {
             return "Specific Event 1";
         }
 
-        [[nodiscard]] std::string get_sender_id() const override {
+        [[nodiscard]] std::string GetSenderID() const override {
             return sender_id_;
         }
 
