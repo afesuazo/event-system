@@ -8,8 +8,11 @@
 
 namespace event_system {
 
+    template<typename TEvent>
+    using Callback = std::function<void(const TEvent& event)>;
+
     /**
-     * @class IEventHandlerBase
+     * @class IEventHandler
      * @brief Interface for all event handlers, intended for polymorphism.
      *
      * Provides a base interface for all event handlers. This allows us to easily create containers for
@@ -17,53 +20,64 @@ namespace event_system {
      *
      * @note Should not be inherited from directly, instead use IEventHandler
      */
-    class IEventHandlerBase {
+    class IEventHandler {
     public:
-        virtual ~IEventHandlerBase() = default;
-
-        virtual void OnEvent(const BaseEvent& event) = 0;
+        virtual ~IEventHandler() = default;
 
         [[nodiscard]] virtual EventType GetHandledEventType() const = 0;
 
     };
 
     /**
-     * @class IEventHandler
+     * @class EventHandler
      * @brief Templated class for creating a handler of a specific event type
      *
-     * @tparam TEvent The event type this handler is intended to subscribe to
+     * @tparam TEvent The event type this handler is intended to listen for
      */
     template<typename TEvent>
-    class IEventHandler : public IEventHandlerBase {
+    class EventHandler : public IEventHandler {
+        static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be derive from BaseEvent");
     public:
-
         /**
-         * @brief Overridden method to handle type-erasure. Will immediately try to call the HandleEvent method.
-         *
-         * Statically casts the event reference to the expected event type (TEvent). If types match,
-         * a virtual HandleEvent function for that event type is called.
+         * @brief Iterates through all registered callbacks, passing the event as an argument to each one.
          *
          * @param event The event that was triggered.
          */
-        void OnEvent(const BaseEvent& event) override {
-            // TODO: Check performance of the runtime check
-            // This function acts as the controlled, type-safe wrapper
-            if (event.get_event_type() == TEvent::get_static_type()) {
-                HandleEvent(static_cast<const TEvent&>(event));
+        void OnEvent(const TEvent& event) {
+            for (auto const& callback: callbacks_) {
+                callback(event);
             }
         }
 
-        [[nodiscard]] EventType GetHandledEventType() const override {
-            return TEvent::get_static_type();
+        /**
+         * @brief Register a callback.
+         *
+         * @param callback Function to be called when an event is received.
+         */
+        int Register(const Callback<TEvent> callback) {
+            callbacks_.push_back(callback);
+            // TODO: Generate a unique id for each callback
+            return callbacks_.size() - 1;
         }
 
-    protected:
         /**
-         * @brief Called when an event this handler subscribed to is triggered
+         * @brief Deregister a callback.
          *
-         * @param event Reference to the event (of type TEvent) that was triggered.
+         * @param callback_id Index of the callback to deregister.
          */
-        virtual void HandleEvent(const TEvent& event) = 0;
+        void Deregister(int callback_id) {
+            // TODO: Replace with a map and generate unique ids for each callback
+            // Replaces callback with an empty version in order to keep all IDs valid
+            if (callback_id >= callbacks_.size()) { return; }
+            callbacks_[callback_id] = [](const TEvent&) {};
+        }
+
+        [[nodiscard]] EventType GetHandledEventType() const override {
+            return TEvent::GetStaticType();
+        }
+
+    private:
+        std::vector<Callback<TEvent>> callbacks_;
     };
 
 }
