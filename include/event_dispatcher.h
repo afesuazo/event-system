@@ -67,7 +67,7 @@ namespace event_system {
          */
         template<typename TEvent>
         void DeregisterAll() {
-            handlers_.erase(typeid(TEvent));
+            handlers_.erase(std::type_index(typeid(TEvent)));
         }
 
         /**
@@ -102,7 +102,7 @@ namespace event_system {
          */
         template<typename TEvent>
         std::shared_ptr<EventHandler<TEvent>> GetDispatcher() {
-            auto& specific_handler = handlers_[typeid(TEvent)];
+            auto& specific_handler = handlers_[std::type_index(typeid(TEvent))];
             if (!specific_handler) {
                 specific_handler.reset(new EventHandler<TEvent>());
             }
