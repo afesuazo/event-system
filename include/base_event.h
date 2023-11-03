@@ -10,13 +10,15 @@ namespace event_system {
 
     enum EventType {
         None                  = 0,
-        GeneralEvent          = 1 << 0,   // 1
-        SpecificEvent         = 1 << 1,   // 2
+        General               = 1 << 0,   // 1
+        Specific              = 1 << 1,   // 2
+        DataEvent             = 1 << 2,   // 4
+        UIEvent               = 1 << 3,   // 4
     };
 
 #define EVENT_CLASS_TYPE(type) \
-    static EventType get_static_type() { return EventType::type; } \
-    virtual EventType get_event_type() const override { return get_static_type(); }
+    static EventType GetStaticType() { return EventType::type; } \
+    virtual EventType GetEventType() const override { return GetStaticType(); }
 
 
     /**
@@ -30,11 +32,11 @@ namespace event_system {
     public:
         virtual ~BaseEvent() = default;
 
-        [[nodiscard]] virtual EventType get_event_type() const = 0;
+        [[nodiscard]] virtual EventType GetEventType() const = 0;
 
-        [[nodiscard]] virtual std::string get_name() const = 0;
+        [[nodiscard]] virtual std::string GetName() const = 0;
 
-        [[nodiscard]] virtual std::string get_sender_id() const = 0;
+        [[nodiscard]] virtual std::string GetSenderID() const = 0;
     };
 
 
