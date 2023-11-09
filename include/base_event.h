@@ -8,28 +8,30 @@
 
 namespace event_system {
 
-    enum EventType {
-        None                  = 0,
-        General               = 1 << 0,   // 1
-        Specific              = 1 << 1,   // 2
-        DataEvent             = 1 << 2,   // 4
-        UIEvent               = 1 << 3,   // 4
+    // Generic example events
+    enum class EventType {
+        None = 0,
+        General =  1 << 0,     // 1
+        Specific = 1 << 1,     // 2
     };
 
-#define EVENT_CLASS_TYPE(type) \
-    static EventType GetStaticType() { return EventType::type; } \
-    virtual EventType GetEventType() const override { return GetStaticType(); }
+#define EVENT_CLASS_TYPE(enum_name, type) \
+        static EventType GetStaticType() { return static_cast<event_system::EventType>(enum_name::type); } \
+        virtual EventType GetEventType() const override { return GetStaticType(); }
+
+#define EVENT_SUBTYPE(subtype_enum_name) \
+    private: subtype_enum_name event_subtype_; \
+    public: virtual subtype_enum_name GetEventSubtype() const { return event_subtype_; } \
 
 
     /**
-     * @class BaseEvent
+     * @struct BaseEvent
      * @brief Base class for all events
      *
      * Provides a simple base class for all events to extend. Essentially and event requires a
      * method to relay any general details about the event type/category and its name
      */
-    class BaseEvent {
-    public:
+    struct BaseEvent {
         virtual ~BaseEvent() = default;
 
         [[nodiscard]] virtual EventType GetEventType() const = 0;
@@ -38,6 +40,5 @@ namespace event_system {
 
         [[nodiscard]] virtual std::string GetSenderID() const = 0;
     };
-
 
 }

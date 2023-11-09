@@ -12,7 +12,7 @@ namespace event_system {
 
     class TestGeneralEvent : public BaseEvent {
     public:
-        EVENT_CLASS_TYPE(General)
+        EVENT_CLASS_TYPE(EventType, General)
 
         explicit TestGeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
@@ -30,7 +30,7 @@ namespace event_system {
 
     class TestSpecificEvent : public BaseEvent {
     public:
-        EVENT_CLASS_TYPE(Specific)
+        EVENT_CLASS_TYPE(EventType, Specific)
 
         explicit TestSpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
