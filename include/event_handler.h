@@ -44,7 +44,8 @@ namespace event_system {
          * @param event The event that was triggered.
          */
         void OnEvent(const TEvent& event) {
-            for (auto const& callback: callbacks_) {
+            auto callbacks_copy = callbacks_;  // Make a copy in case vector gets modified during iteration
+            for (auto const& callback : callbacks_copy) {
                 callback(event);
             }
         }

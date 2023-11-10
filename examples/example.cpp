@@ -11,7 +11,7 @@ using namespace event_system;
 
 class GeneralEvent : public BaseEvent {
 public:
-    EVENT_CLASS_TYPE(General)
+    EVENT_CLASS_TYPE(EventType, General)
 
     explicit GeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
@@ -29,7 +29,7 @@ private:
 
 class SpecificEvent : public BaseEvent {
 public:
-    EVENT_CLASS_TYPE(Specific)
+    EVENT_CLASS_TYPE(EventType, Specific)
 
     explicit SpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
 
