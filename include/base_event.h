@@ -38,7 +38,7 @@ namespace event_system {
 
         [[nodiscard]] virtual std::string GetName() const = 0;
 
-        [[nodiscard]] virtual std::string GetSenderID() const = 0;
+        [[nodiscard]] virtual size_t GetSenderID() const = 0;
     };
 
 }
