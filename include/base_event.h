@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <cstddef>
 
 namespace event_system {
 
@@ -38,7 +39,7 @@ namespace event_system {
 
         [[nodiscard]] virtual std::string GetName() const = 0;
 
-        [[nodiscard]] virtual size_t GetSenderID() const = 0;
+        [[nodiscard]] virtual std::size_t GetSenderID() const = 0;
     };
 
 }

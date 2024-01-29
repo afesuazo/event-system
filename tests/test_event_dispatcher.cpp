@@ -88,8 +88,8 @@ TEST_F(EventDispatcherTest, TriggerEventMultipleSubscriberTest) {
 }
 
 TEST_F(EventDispatcherTest, UnsubscribeAllCallbacksTest) {
-    auto general_callback = [this](const TestGeneralEvent& event){};
-    auto specific_callback = [this](const TestSpecificEvent& event){};
+    auto general_callback = [](const TestGeneralEvent& event){};
+    auto specific_callback = [](const TestSpecificEvent& event){};
 
     local_event_dispatcher->Register<TestGeneralEvent>(general_callback);
     local_event_dispatcher->Register<TestSpecificEvent>(specific_callback);

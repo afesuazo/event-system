@@ -3,7 +3,6 @@
 //
 
 #pragma once
-#include <utility>
 
 #include "base_event.h"
 #include "event_dispatcher.h"
@@ -14,36 +13,36 @@ namespace event_system {
     public:
         EVENT_CLASS_TYPE(EventType, General)
 
-        explicit TestGeneralEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+        explicit TestGeneralEvent(std::size_t sender_id = 0) : sender_id_{sender_id} {}
 
         [[nodiscard]] std::string GetName() const override {
             return "General Event 1";
         }
 
-        [[nodiscard]] std::string GetSenderID() const override {
+        [[nodiscard]] std::size_t GetSenderID() const override {
             return sender_id_;
         }
 
     private:
-        std::string sender_id_;
+        std::size_t sender_id_;
     };
 
     class TestSpecificEvent : public BaseEvent {
     public:
         EVENT_CLASS_TYPE(EventType, Specific)
 
-        explicit TestSpecificEvent(std::string sender_id = "") : sender_id_(std::move(sender_id)) {}
+        explicit TestSpecificEvent(std::size_t sender_id = 0) : sender_id_{sender_id} {}
 
         [[nodiscard]] std::string GetName() const override {
             return "Specific Event 1";
         }
 
-        [[nodiscard]] std::string GetSenderID() const override {
+        [[nodiscard]] std::size_t GetSenderID() const override {
             return sender_id_;
         }
 
     private:
-        std::string sender_id_;
+        std::size_t sender_id_;
     };
 
 }
