@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <memory>
 #include <typeindex>
+#include <iostream>
 
 namespace event_system {
 
@@ -21,29 +22,16 @@ namespace event_system {
      * the registered callbacks to said handler.
      */
     class EventDispatcher {
-        using HandlerSharedPtr = std::shared_ptr<IEventHandler>;
-        using EventDispatcherMap = std::unordered_map<std::type_index, HandlerSharedPtr>;
+        using EventDispatcherMap = std::unordered_map<std::type_index, std::unique_ptr<IEventHandler>>;
 
     public:
         EventDispatcher() = default;
-
         ~EventDispatcher() = default;
 
-        /**
-         * @brief Register a callback for a specific event type.
-         *
-         * @tparam TEvent The event type the callback will be registered for.
-         * @param callback Function to be called when an event is received.
-         *
-         * @returns int Identifier representing the callback in the EventHandler
-         *
-         * Adds a callback to the EventHandler for the specified event type. If there is no handler for the event type,
-         * one will be created.
-         */
         template<typename TEvent>
-        int Register(Callback<TEvent> callback) {
-            int callback_id = GetDispatcher<TEvent>()->Register(callback);
-            return callback_id;
+        int AddCallback(const Callback<TEvent>& callback) {
+            auto&  handler = GetOrCreateHandler<TEvent>();
+            return handler.Register(callback);
         }
 
         /**
@@ -55,57 +43,73 @@ namespace event_system {
          * Removes a callback from the EventHandler for the specified event type.
          */
         template<typename TEvent>
-        void Deregister(int callback_id) {
+        void RemoveCallback(int callback_id) {
+            auto handler = GetHandler<TEvent>();
+            if (!handler) { return; }
             // TODO: Delete event handler if its last callback has been removed
-            GetDispatcher<TEvent>()->Deregister(callback_id);
+            handler->Deregister(callback_id);
         }
 
         /**
          * @brief Removes all callbacks registered for a specific event type.
-         *
          * @tparam TEvent The event type for which callbacks will be removed.
          */
         template<typename TEvent>
-        void DeregisterAll() {
+        void ClearHandlerCallbacks() {
             handlers_.erase(std::type_index(typeid(TEvent)));
         }
 
         /**
          * @brief Dispatches an event to the appropriate EventHandler.
          *
-         * @tparam TEvent The type of the event to be dispatched. Must derive from BaseEvent
+         * @tparam TEvent The type of the event to be dispatched.
          * @param event Reference to the event object to dispatch.
          */
         template <typename TEvent>
         void Dispatch(const TEvent& event) {
-            static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be derive from BaseEvent");
-            GetDispatcher<TEvent>()->OnEvent(event);
+            auto handler = GetHandler<TEvent>();
+            if (!handler) {
+                std::clog << "No handler for event type: " << typeid(TEvent).name() << std::endl;
+                return;
+            }
+
+            handler->OnEvent(event);
         }
 
         /**
           * @brief Returns the total amount of active EventHandlers
-          *
           * @return size_t representing the number of handlers
           */
         [[nodiscard]] size_t GetHandlerCount() const;
 
     private:
+        // Returning a reference since the method ensures that the handler exists after the call
+        template<typename TEvent>
+        EventHandler<TEvent>& GetOrCreateHandler() {
+            auto it = handlers_.find(std::type_index(typeid(TEvent)));
+            if (it == handlers_.end()) {
+                auto handler = std::make_unique<EventHandler<TEvent>>();
+                it = handlers_.emplace(std::type_index(typeid(TEvent)), std::move(handler)).first;
+            }
+            return static_cast<EventHandler<TEvent>&>(*(it->second));
+        }
+
         /**
          * @brief Returns a pointer to the EventHandler for the specified event type.
          * If there is no handler for the event type, one will be created.
          *
          * @tparam TEvent The event type of the handler.
-         *
-         * @return size_t Pointer to the EventHandler object.
+         * @returns EventHandler<TEvent>* Pointer to the EventHandler object.
          */
         template<typename TEvent>
-        std::shared_ptr<EventHandler<TEvent>> GetDispatcher() {
-            auto& specific_handler = handlers_[std::type_index(typeid(TEvent))];
-            if (!specific_handler) {
-                specific_handler.reset(new EventHandler<TEvent>());
+        EventHandler<TEvent>* GetHandler() {
+            auto it = handlers_.find(std::type_index(typeid(TEvent)));
+            if (it != handlers_.end()) {
+                return static_cast<EventHandler<TEvent>*>(it->second.get());
             }
-            return std::static_pointer_cast<EventHandler<TEvent>>(specific_handler);
+            return nullptr;
         }
+
     private:
         EventDispatcherMap handlers_;
     };
