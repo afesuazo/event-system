@@ -3,13 +3,14 @@
 //
 
 #pragma once
+
 #include <functional>
 #include <vector>
 
 namespace event_system {
 
     template<typename... Args>
-    using Callback = std::function<void(const Args&...)>;
+    using Callback = std::function<void(const Args& ...)>;
 
     /**
      * @class IEventHandler
@@ -27,22 +28,23 @@ namespace event_system {
 
     /**
      * @class EventHandler
-     * @brief Templated class for creating a handler of a specific event type.
-     * @tparam Args The types of the arguments that will be passed to the callbacks.
+     * @brief Templated class that holds a collection of callbacks for a specific event type and calls them when an event is received.
+     * @tparam Args The types of the arguments that will be passed to all callbacks.
      *
      * @example EventHandler<int> handler{};
      * @example EventHandler<std::string, float> handler{};
      */
     template<typename... Args>
-    class EventHandler: public IEventHandler {
+    class EventHandler : public IEventHandler {
     public:
         /**
          * @brief Iterates through all registered callbacks, calling them with the provided arguments.
          * @param args Arguments to be passed to the callbacks.
          */
-        void OnEvent(const Args&... args) {
-            auto callbacks_copy = callbacks_;  // Make a copy in case vector gets modified during iteration
-            for (const auto& callback : callbacks_copy) {
+        void OnEvent(const Args& ... args) {
+            // Make a copy in case vector gets modified during iteration
+            auto callbacks_copy = callbacks_;
+            for (const auto& callback: callbacks_copy) {
                 callback(args...);
             }
         }
@@ -64,7 +66,7 @@ namespace event_system {
             // TODO: Replace with a map and generate unique ids for each callback
             // Replaces a callback with an empty version in order to keep all IDs valid
             if (callback_id > callbacks_.size()) { return; }
-            callbacks_[callback_id-1] = [](const Args&...) {};
+            callbacks_[callback_id - 1] = [](const Args& ...) {};
         }
 
         [[nodiscard]] std::size_t GetCallbackCount() const {
