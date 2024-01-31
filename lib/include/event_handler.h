@@ -3,8 +3,8 @@
 //
 
 #pragma once
-
-#include "base_event.h"
+#include <functional>
+#include <vector>
 
 namespace event_system {
 
@@ -48,7 +48,7 @@ namespace event_system {
         }
 
         /**
-         * @brief Register a callback.
+         * @brief Adds a callback.
          * @param callback Function to be called when an event is received.
          */
         int Register(const Callback<Args...>& callback) {
@@ -57,12 +57,12 @@ namespace event_system {
         }
 
         /**
-         * @brief Deregister a callback.
+         * @brief Removes a callback.
          * @param callback_id Index of the callback to deregister.
          */
         void Deregister(int callback_id) {
             // TODO: Replace with a map and generate unique ids for each callback
-            // Replaces callback with an empty version in order to keep all IDs valid
+            // Replaces a callback with an empty version in order to keep all IDs valid
             if (callback_id > callbacks_.size()) { return; }
             callbacks_[callback_id-1] = [](const Args&...) {};
         }
