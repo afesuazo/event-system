@@ -8,77 +8,71 @@
 
 namespace event_system {
 
-    template<typename TEvent>
-    using Callback = std::function<void(const TEvent& event)>;
+    template<typename... Args>
+    using Callback = std::function<void(const Args&...)>;
 
     /**
      * @class IEventHandler
-     * @brief Interface for all event handlers, intended for polymorphism.
+     * @brief Interface for all event handlers
      *
-     * Provides a base interface for all event handlers. This allows us to easily create containers for
-     * EventHandlers and handle multiple types of events in a uniform manner.
+     * Provides a base interface for all event handlers. This allows EventHandlers for
+     * different event types to be stored in a single container.
      *
-     * @note Should not be inherited from directly, instead use IEventHandler
+     * @note Should not be inherited from directly, instead use EventHandler
      */
     class IEventHandler {
     public:
         virtual ~IEventHandler() = default;
-
-        [[nodiscard]] virtual EventType GetHandledEventType() const = 0;
-
     };
 
     /**
      * @class EventHandler
-     * @brief Templated class for creating a handler of a specific event type
+     * @brief Templated class for creating a handler of a specific event type.
+     * @tparam Args The types of the arguments that will be passed to the callbacks.
      *
-     * @tparam TEvent The event type this handler is intended to listen for
+     * @example EventHandler<int> handler{};
+     * @example EventHandler<std::string, float> handler{};
      */
-    template<typename TEvent>
-    class EventHandler : public IEventHandler {
-        static_assert(std::is_base_of<BaseEvent, TEvent>::value, "TEvent must be derive from BaseEvent");
+    template<typename... Args>
+    class EventHandler: public IEventHandler {
     public:
         /**
-         * @brief Iterates through all registered callbacks, passing the event as an argument to each one.
-         *
-         * @param event The event that was triggered.
+         * @brief Iterates through all registered callbacks, calling them with the provided arguments.
+         * @param args Arguments to be passed to the callbacks.
          */
-        void OnEvent(const TEvent& event) {
+        void OnEvent(const Args&... args) {
             auto callbacks_copy = callbacks_;  // Make a copy in case vector gets modified during iteration
-            for (auto const& callback : callbacks_copy) {
-                callback(event);
+            for (const auto& callback : callbacks_copy) {
+                callback(args...);
             }
         }
 
         /**
          * @brief Register a callback.
-         *
          * @param callback Function to be called when an event is received.
          */
-        int Register(const Callback<TEvent> callback) {
+        int Register(const Callback<Args...>& callback) {
             callbacks_.push_back(callback);
-            // TODO: Generate a unique id for each callback
-            return callbacks_.size() - 1;
+            return callbacks_.size();
         }
 
         /**
          * @brief Deregister a callback.
-         *
          * @param callback_id Index of the callback to deregister.
          */
         void Deregister(int callback_id) {
             // TODO: Replace with a map and generate unique ids for each callback
             // Replaces callback with an empty version in order to keep all IDs valid
-            if (callback_id >= callbacks_.size()) { return; }
-            callbacks_[callback_id] = [](const TEvent&) {};
+            if (callback_id > callbacks_.size()) { return; }
+            callbacks_[callback_id-1] = [](const Args&...) {};
         }
 
-        [[nodiscard]] EventType GetHandledEventType() const override {
-            return TEvent::GetStaticType();
+        [[nodiscard]] std::size_t GetCallbackCount() const {
+            return callbacks_.size();
         }
 
     private:
-        std::vector<Callback<TEvent>> callbacks_;
+        std::vector<Callback<Args...>> callbacks_;
     };
 
 }
