@@ -9,9 +9,6 @@
 
 namespace event_system {
 
-    template<typename... Args>
-    using Callback = std::function<void(const Args& ...)>;
-
     /**
      * @class IEventHandler
      * @brief Interface for all event handlers
@@ -36,45 +33,46 @@ namespace event_system {
      */
     template<typename... Args>
     class EventHandler : public IEventHandler {
-    public:
-        /**
-         * @brief Iterates through all registered callbacks, calling them with the provided arguments.
-         * @param args Arguments to be passed to the callbacks.
-         */
-        void OnEvent(const Args& ... args) {
-            // Make a copy in case vector gets modified during iteration
-            auto callbacks_copy = callbacks_;
-            for (const auto& callback: callbacks_copy) {
-                callback(args...);
-            }
-        }
+        using Callback = std::function<void(const Args&...)>;
 
+
+    public:
         /**
          * @brief Adds a callback.
          * @param callback Function to be called when an event is received.
          */
-        int Register(const Callback<Args...>& callback) {
-            callbacks_.push_back(callback);
-            return callbacks_.size();
+        size_t AddCallback(const Callback& callback) {
+            static size_t id = 0;
+            callbacks_[id] = callback;
+            return id++;
         }
 
         /**
          * @brief Removes a callback.
-         * @param callback_id Index of the callback to deregister.
+         * @param callback_id Index of the callback to remove.
          */
-        void Deregister(int callback_id) {
-            // TODO: Replace with a map and generate unique ids for each callback
-            // Replaces a callback with an empty version in order to keep all IDs valid
-            if (callback_id > callbacks_.size()) { return; }
-            callbacks_[callback_id - 1] = [](const Args& ...) {};
+        void RemoveCallback(size_t callback_id) {
+            callbacks_.erase(callback_id);
         }
 
-        [[nodiscard]] std::size_t GetCallbackCount() const {
+        /**
+ * @brief Iterates through all registered callbacks, calling them with the provided arguments.
+ * @param args Arguments to be passed to the callbacks.
+ */
+        void OnEvent(Args... args) {
+            // Make a copy in case vector gets modified during iteration
+            auto callbacks_copy = callbacks_;
+            for (auto& [_, callback]: callbacks_copy) {
+                callback(args...);
+            }
+        }
+
+        [[nodiscard]] size_t GetCallbackCount() const {
             return callbacks_.size();
         }
 
     private:
-        std::vector<Callback<Args...>> callbacks_;
+        std::unordered_map<size_t, Callback> callbacks_;
     };
 
 }

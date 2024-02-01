@@ -19,7 +19,7 @@ struct LogEvent {
     std::string message;
 };
 
-auto OnLogEvent(const LogEvent& event) -> void {
+void OnLogEvent(const LogEvent& event)  {
     switch (event.level) {
         case LogEvent::LogLevel::DEBUG:
             std::cout << "[DEBUG] " << event.message << std::endl;
@@ -44,7 +44,7 @@ auto main(int argc, char* argv[]) -> int  {
 
     EventDispatcher event_dispatcher;
 
-    int callback_id = event_dispatcher.AddCallback<LogEvent>(OnLogEvent);
+    size_t callback_id = event_dispatcher.AddCallback<LogEvent>(OnLogEvent);
 
     event_dispatcher.Dispatch<LogEvent>({
                                                 LogEvent::LogLevel::DEBUG,
