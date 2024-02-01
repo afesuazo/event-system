@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 project(event_system
-        VERSION 0.1
+        VERSION 1.0.0
         DESCRIPTION "A simple and fast event system for internal communication"
         HOMEPAGE_URL "https://github.com/afesuazo/event_system")
 
