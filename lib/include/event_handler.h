@@ -59,9 +59,8 @@ public:
    * @param args Arguments to be passed to the callbacks.
    */
   void OnEvent(Args... args) {
-    // Make a copy in case vector gets modified during iteration
-    auto callbacks_copy = callbacks_;
-    for (auto &[_, callback] : callbacks_copy) {
+    // TODO: Map may be modified while iterating, fix this
+    for (auto &[_, callback] : callbacks_) {
       callback(args...);
     }
   }

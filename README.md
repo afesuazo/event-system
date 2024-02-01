@@ -16,7 +16,23 @@ the library imposes minimal restrictions on event types and handling.
 
 ## Performance
 
-// TODO
+### Handler
+
+Metrics generated using Google Benchmark
+
+```text
+Event type : int
+----------------------------------------------------------------------------------------
+Benchmark                           Time             CPU   Iterations
+----------------------------------------------------------------------------------------
+Call1EventsWith1Callbacks          1.99 ns         1.97 ns    356913413
+Call1EventsWith10Callbacks         11.6 ns         11.4 ns     60631783
+Call1EventsWith100Callbacks         109 ns          108 ns      6540528
+Call1EventsWith1KCallbacks          983 ns          969 ns       717941
+```
+
+* Performance metrics are still being measured and evaluated at the moment. The numbers above give a rough idea, however 
+more accurate and extensive metrics will be added soon.
 
 ## Getting Started
 
