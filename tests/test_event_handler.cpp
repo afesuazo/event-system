@@ -7,20 +7,34 @@
 
 using namespace event_system;
 
+void OnIntEvent(int a)
+{
+  std::cout << "Event received: " << a << std::endl;
+}
+
 class EventHandlerTest : public ::testing::Test {
 protected:
   EventHandler<int> handler;
 };
 
 // Ensures callbacks are being added to the handler
-TEST_F(EventHandlerTest, RegisterAddsCallbackToHandler) {
+TEST_F(EventHandlerTest, AddCallback_SingleCallbackIncrementsCount) {
   ASSERT_EQ(handler.GetCallbackCount(), 0);
   handler.AddCallback([](const int &event) {});
   ASSERT_EQ(handler.GetCallbackCount(), 1);
 }
 
+TEST_F(EventHandlerTest, AddCallback_MultipleCallbackIncrementsCount) {
+  // Ensures that callbacks are not overwritten
+  ASSERT_EQ(handler.GetCallbackCount(), 0);
+  handler.AddCallback([](const int &event) {});
+  handler.AddCallback([](const int &event) {});
+
+  ASSERT_EQ(handler.GetCallbackCount(), 2);
+}
+
 // Ensures that other handlers are not affected
-TEST_F(EventHandlerTest, RegisterAddsCallbackToSingleHandler) {
+TEST_F(EventHandlerTest, AddCallbacks_AddsCallbackToSingleHandler) {
   EventHandler<int> handler2{};
 
   ASSERT_EQ(handler.GetCallbackCount(), 0);
@@ -32,13 +46,11 @@ TEST_F(EventHandlerTest, RegisterAddsCallbackToSingleHandler) {
   ASSERT_EQ(handler2.GetCallbackCount(), 0);
 }
 
-TEST_F(EventHandlerTest, RegisterAppendsToCallbacks) {
-  // Ensures that callbacks are not overwritten
-  ASSERT_EQ(handler.GetCallbackCount(), 0);
-  handler.AddCallback([](const int &event) {});
-  handler.AddCallback([](const int &event) {});
-
-  ASSERT_EQ(handler.GetCallbackCount(), 2);
+TEST_F(EventHandlerTest, AddCallbacks_IgnoreDuplicate)
+{
+  handler.AddCallback(OnIntEvent);
+  handler.AddCallback(OnIntEvent);
+  ASSERT_TRUE(handler.GetCallbackCount() == 1);
 }
 
 TEST_F(EventHandlerTest, OnEventCallsRegisteredCallbacks_SingleCallback) {
@@ -90,3 +102,6 @@ TEST_F(EventHandlerTest, DeregisterDoesNotAffectOtherCallbacks) {
   handler.OnEvent(5);
   ASSERT_TRUE(callback_called);
 }
+
+
+// TODO: Test overflow of callback id

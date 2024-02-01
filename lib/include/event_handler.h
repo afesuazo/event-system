@@ -27,7 +27,8 @@ public:
  * @class EventHandler
  * @brief Templated class that holds a collection of callbacks for a specific
  * event type and calls them when an event is received.
- * @tparam Args The types of the arguments that will be passed to all callbacks.
+ * @tparam Args The types of the arguments that will be passed to all
+ * callbacks.
  *
  * @example EventHandler<int> handler{};
  * @example EventHandler<std::string, float> handler{};

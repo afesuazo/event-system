@@ -8,7 +8,9 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
+#include <cstddef>
 #include <typeindex>
+#include <typeinfo>
 #include <unordered_map>
 
 namespace event_system {
@@ -24,9 +26,6 @@ namespace event_system {
  * along the registered callbacks to said handler.
  */
 class EventDispatcher {
-  using EventDispatcherMap =
-      std::unordered_map<std::type_index, std::unique_ptr<IEventHandler>>;
-
 public:
   EventDispatcher() = default;
   ~EventDispatcher() = default;
@@ -38,10 +37,11 @@ public:
    * @returns int Identifier of the callback. Ids are unique within each event
    * type.
    *
-   * @note If there is no EventHandler for the specified event type, one will be
-   * created.
+   * @note If there is no EventHandler for the specified event type, one will
+   * be created.
    * @note Non const references can't be used as they cannot be bound to
    * rvalues.
+   * @todo Treat const int and int as the same type. Tre
    */
   template <typename... Args, typename Function>
   size_t AddCallback(Function &&callback) {
@@ -109,7 +109,7 @@ private:
     }
     // Return a reference instead of a pointer since the handler is guaranteed
     // to exist
-    return static_cast<EventHandler<Args...> &>(*(it->second));
+    return static_cast<EventHandler<Args...>&>(*it->second);
   }
 
   /**
@@ -118,7 +118,7 @@ private:
    * @returns EventHandler<TEvent>* Pointer to the EventHandler object.
    */
   template <typename... Args>
-  [[nodiscard]] EventHandler<Args...> *GetHandler() {
+  [[nodiscard]] EventHandler<Args...>* GetHandler() {
     auto it = handlers_.find(std::type_index(typeid(EventHandler<Args...>)));
     if (it != handlers_.end()) {
       return static_cast<EventHandler<Args...> *>(it->second.get());
@@ -127,7 +127,7 @@ private:
   }
 
 private:
-  EventDispatcherMap handlers_;
+  std::unordered_map<std::type_index, std::unique_ptr<IEventHandler>> handlers_;
 };
 
 } // namespace event_system
