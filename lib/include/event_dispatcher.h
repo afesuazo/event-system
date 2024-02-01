@@ -81,6 +81,7 @@ public:
    * @param event The event to be dispatched.
    */
   template <typename... Args> void Dispatch(Args... args) {
+    // TODO: Cache the handler to avoid multiple lookups
     auto handler = GetHandler<Args...>();
     if (!handler) {
       std::clog << "No handler for event type: "
