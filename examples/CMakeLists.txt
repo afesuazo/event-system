@@ -1,4 +1,4 @@
-set(EXAMPLES_SOURCES example.cpp)
+set(EXAMPLES_SOURCES logging.cpp)
 
 add_executable(examples ${EXAMPLES_SOURCES})
 
