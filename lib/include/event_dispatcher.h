@@ -59,8 +59,12 @@ public:
     if (!handler) {
       return;
     }
-    // TODO: Delete event handler if its last callback has been removed
+
     handler->RemoveCallback(callback_id);
+
+    if (handler->GetCallbackCount() == 0) {
+      ClearHandlerCallbacks<Args...>();
+    }
   }
 
   /**

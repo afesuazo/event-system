@@ -218,16 +218,15 @@ TEST_F(EventDispatcherTest, CallbackInvokedProperly_NonConstReferenceParameter)
   ASSERT_EQ(test_input_int_1, 1);
 }
 
-// Complex parameters
-
-
 // Dispatching events when no callbacks are registered
+
 TEST_F(EventDispatcherTest, DispatchingWithNoCallbacksDoesNotCreateHandler) {
   EXPECT_NO_THROW(event_dispatcher.Dispatch<int>(100));
   ASSERT_TRUE(event_dispatcher.GetHandlerCount () == 0);
 }
 
 // Multiple callbacks for the same event
+
 TEST_F(EventDispatcherTest, DispatchToMultipleCallbacks_SameEventType) {
   int callback_count = 0;
 
@@ -238,6 +237,7 @@ TEST_F(EventDispatcherTest, DispatchToMultipleCallbacks_SameEventType) {
 }
 
 // Multiple callbacks for different events
+
 TEST_F(EventDispatcherTest, DispatchToMultipleCallbacks_DifferentEventTypes) {
   int callback_count = 0;
   bool string_callback_invoked = false;
