@@ -13,7 +13,7 @@ if (ENABLE_TESTS)
     add_subdirectory(tests)
 endif ()
 
-option(ENABLE_PERFORMANCE_TESTS "Enable performance metrics" ON)
+option(ENABLE_PERFORMANCE_TESTS "Enable performance metrics" OFF)
 if (ENABLE_PERFORMANCE_TESTS)
     add_subdirectory(performance)
 endif ()
