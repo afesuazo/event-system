@@ -1,4 +1,6 @@
-# EventSystem [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
+# EventSystem 
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
 
 Light and flexible messaging system to facilitate event-driven communication between different parts of an application.
 
